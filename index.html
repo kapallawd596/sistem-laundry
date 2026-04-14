@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sistem Manajemen Laundry Modern | LaundryClean</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background dengan partikel berkedip -->
+    <div class="bg-blur"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <!-- Header dengan Jam & Teks Berjalan -->
+        <div class="header">
+            <div class="top-bar">
+                <div class="datetime-container">
+                    <div class="date-box">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
+                    </div>
+                    <div class="time-box" id="clock">
+                        <i class="fas fa-clock"></i>
+                        <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+                    </div>
+                </div>
+                <div class="user-bar">
+                    <div class="user-greeting">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userNameDisplay">Guest</span>
+                    </div>
+                    <button class="btn-logout-small" id="logoutBtnMain">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Running Text / Marquee dengan efek lampu -->
+            <div class="running-text-container">
+                <div class="running-text">
+                    <div class="running-text-content" id="runningText">
+                        🧺 WELCOME TO LAUNDRY CLEAN! 🎉 • PROMO KHUSUS 20% UNTUK 10 KG PERTAMA! • GRATIS ANTIAR! • LAYANAN 24 JAM! • 🧺
+                    </div>
+                </div>
+                <div class="neon-border"></div>
+            </div>
+            
+            <h1 class="glow-text">🧺 Laundry<span>Clean</span></h1>
+            <p class="tagline">Sistem Manajemen Laundry Modern • Cashless • Antrian Digital</p>
+            <div class="rainbow-divider"></div>
+        </div>
+
+        <!-- Blink Lamp Indicator -->
+        <div class="status-lights">
+            <div class="light red">
+                <div class="light-bulb"></div>
+                <span>SISTEM</span>
+            </div>
+            <div class="light yellow">
+                <div class="light-bulb"></div>
+                <span>AKTIF</span>
+            </div>
+            <div class="light green">
+                <div class="light-bulb"></div>
+                <span>ONLINE</span>
+            </div>
+            <div class="light blue">
+                <div class="light-bulb"></div>
+                <span>READY</span>
+            </div>
+        </div>
+
+        <!-- Antrian Hari Ini dengan efek glow -->
+        <div class="queue-card glass-card">
+            <div class="queue-header">
+                <h3><i class="fas fa-ticket-alt"></i> 🎫 Antrian Hari Ini</h3>
+                <div class="current-queue">
+                    <span class="label">🔄 Sekarang:</span>
+                    <span class="queue-number" id="currentQueueNumber">-</span>
+                </div>
+            </div>
+            <div class="queue-list-container">
+                <div class="queue-list" id="queueList">
+                    <p style="color: #B8AD7A; text-align: center;">Memuat antrian...</p>
+                </div>
+            </div>
+            <div class="queue-actions">
+                <button class="btn-next" id="nextQueueBtn">
+                    <i class="fas fa-forward"></i> Panggil Antrian
+                </button>
+                <button class="btn-reset-queue" id="resetQueueBtn">
+                    <i class="fas fa-sync-alt"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Grid dengan animasi -->
+        <div class="stats-grid" id="statsContainer">
+            <div class="stat-card animated-card" style="border-left-color: #F4A261;">
+                <div>
+                    <div class="stat-label"><i class="far fa-clock"></i> Menunggu</div>
+                    <div class="stat-count" id="countMenunggu">0</div>
+                </div>
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-card animated-card" style="border-left-color: #F7C35C;">
+                <div>
+                    <div class="stat-label"><i class="fas fa-box-open"></i> Diproses</div>
+                    <div class="stat-count" id="countProses">0</div>
+                </div>
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="stat-card animated-card" style="border-left-color: #27AE60;">
+                <div>
+                    <div class="stat-label"><i class="fas fa-check-circle"></i> Selesai</div>
+                    <div class="stat-count" id="countSelesai">0</div>
+                </div>
+                <i class="fas fa-trophy"></i>
+            </div>
+        </div>
+
+        <!-- Revenue Card dengan animasi -->
+        <div class="revenue-card glass-card">
+            <div>
+                <h3><i class="fas fa-chart-line"></i> 💰 Total Pendapatan</h3>
+                <div class="amount" id="totalRevenue">Rp 0</div>
+            </div>
+            <i class="fas fa-coins coin-animation"></i>
+        </div>
+
+        <!-- Wallet Card -->
+        <div class="wallet-card glass-card" onclick="openCashlessModal()">
+            <div class="wallet-left">
+                <i class="fas fa-wallet"></i>
+                <div>
+                    <h4>Dompet Digital</h4>
+                    <p id="userBalanceDisplay">Rp 0</p>
+                </div>
+            </div>
+            <button class="btn-topup" onclick="event.stopPropagation(); openCashlessModal()">
+                <i class="fas fa-plus-circle"></i> Top Up
+            </button>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="search-box glass-effect">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="🔍 Cari nama pelanggan...">
+            </div>
+            <button class="btn-primary pulse-btn" id="openAddModalBtn">
+                <i class="fas fa-plus"></i> Tambah Laundry
+            </button>
+        </div>
+
+        <!-- Tabel Laundry -->
+        <div class="card glass-card">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> No. Antri</th>
+                            <th><i class="fas fa-user"></i> Pelanggan</th>
+                            <th><i class="fas fa-weight-hanging"></i> Berat</th>
+                            <th><i class="fas fa-tags"></i> Layanan</th>
+                            <th><i class="fas fa-money-bill"></i> Total</th>
+                            <th><i class="fas fa-chart-simple"></i> Status</th>
+                            <th><i class="fas fa-credit-card"></i> Pembayaran</th>
+                            <th><i class="fas fa-calendar"></i> Tanggal</th>
+                            <th><i class="fas fa-cog"></i> Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laundryTableBody">
+                        <tr><td colspan="9" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-box-open" style="font-size: 2rem;"></i><br>Belum ada data
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 LaundryClean • <i class="fas fa-heart" style="color: #F4A261;"></i> Sistem Cashless & Antrian Digital • <span id="footerTime"></span></p>
+        </footer>
+    </div>
+
+    <!-- Modal Tambah/Edit -->
+    <div id="modal" class="modal">
+        <div class="modal-content glass-card">
+            <h3 id="modalTitle"><i class="fas fa-plus-circle"></i> Tambah Laundry</h3>
+            <input type="text" id="customerName" placeholder="📝 Nama Pelanggan" required>
+            <input type="number" id="weight" step="0.1" placeholder="⚖️ Berat (kg)" required>
+            <select id="serviceType">
+                <option value="reguler">🕒 Reguler (3 hari) - Rp 8.000/kg</option>
+                <option value="express">⚡ Express (1 hari) - Rp 12.000/kg</option>
+                <option value="setrika">👔 Setrika Saja - Rp 5.000/kg</option>
+            </select>
+            <select id="status">
+                <option value="menunggu">⏳ Menunggu</option>
+                <option value="proses">🔄 Proses</option>
+                <option value="selesai">✅ Selesai</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeModalBtn">Batal</button>
+                <button class="btn-primary" id="saveModalBtn">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal QR Payment -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content payment-modal glass-card">
+            <h3><i class="fas fa-qrcode"></i> Scan QRIS</h3>
+            <div id="qrcodeContainer" style="display: flex; justify-content: center; margin: 1rem 0;"></div>
+            <div class="payment-details">
+                <p><strong>💰 Total Bayar:</strong> <span id="paymentAmount">Rp 0</span></p>
+                <p><i class="fas fa-mobile-alt"></i> Scan pakai GoPay, OVO, Dana, atau LinkAja</p>
+            </div>
+            <div class="payment-actions">
+                <button class="btn-secondary" id="closePaymentBtn">Batal</button>
+                <button class="btn-primary pulse-btn" id="confirmPaymentBtn">Konfirmasi Bayar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cashless Top Up -->
+    <div id="cashlessModal" class="modal">
+        <div class="modal-content glass-card">
+            <h3><i class="fas fa-wallet"></i> 💳 Dompet Digital</h3>
+            <div class="wallet-info">
+                <p>Saldo Anda: <strong id="userBalance">Rp 0</strong></p>
+            </div>
+            <input type="number" id="topupAmount" step="1000" placeholder="💵 Jumlah top up (min Rp 10.000)">
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeCashlessBtn">Tutup</button>
+                <button class="btn-primary pulse-btn" id="confirmTopupBtn">Top Up</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
