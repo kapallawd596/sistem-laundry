@@ -224,7 +224,6 @@ body.forgot-page {
     font-size: 0.85rem;
 }
 
-/* Untuk lupa password, teks putih */
 .forgot-card .auth-header h1,
 .forgot-card .auth-header p {
     color: white;
@@ -234,7 +233,6 @@ body.forgot-page {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* Input group */
 .input-group {
     margin-bottom: 1.2rem;
 }
@@ -274,7 +272,6 @@ body.forgot-page {
     box-shadow: 0 0 0 3px rgba(247, 195, 92, 0.1);
 }
 
-/* Wrapper untuk icon di lupa password */
 .input-wrapper {
     position: relative;
 }
@@ -295,7 +292,6 @@ body.forgot-page {
     padding-left: 2.8rem;
 }
 
-/* Tombol auth */
 .btn-auth {
     width: 100%;
     background: #2C3E4E;
@@ -324,7 +320,6 @@ body.forgot-page {
     box-shadow: 0 10px 25px -5px rgba(247, 195, 92, 0.5);
 }
 
-/* Footer link */
 .auth-footer {
     text-align: center;
     margin-top: 1.5rem;
@@ -336,7 +331,6 @@ body.forgot-page {
     text-decoration: none;
 }
 
-/* Alert & pesan */
 .error-msg, .alert-error {
     background: #FEE2E2;
     color: #DC2626;
@@ -382,7 +376,6 @@ body.forgot-page {
     margin-top: 0.3rem;
 }
 
-/* Responsive auth */
 @media (max-width: 768px) {
     .auth-card {
         padding: 1.5rem;
