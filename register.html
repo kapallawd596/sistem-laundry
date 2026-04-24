@@ -2,156 +2,382 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrasi - LaundryClean</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Daftar - LaundryClean | Sistem Laundry Modern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #F4F1E1 0%, #E8E0C5 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow-x: hidden;
         }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(247, 195, 92, 0.15), transparent);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-100px) translateX(50px);
+                opacity: 0.6;
+            }
+        }
+
+        /* Waves */
+        .waves {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 150px;
+            z-index: 0;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(247,195,92,0.08)" d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,186.7C672,192,768,224,864,229.3C960,235,1056,213,1152,192C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x;
+            background-size: cover;
+            animation: wave 20s linear infinite;
+        }
+
+        @keyframes wave {
+            0% { background-position-x: 0; }
+            100% { background-position-x: 1440px; }
+        }
+
         .auth-container {
-            max-width: 450px;
-            width: 90%;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
+
         .auth-card {
-            background: white;
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
             border-radius: 32px;
             padding: 2rem;
-            box-shadow: 20px 20px 0 rgba(44, 62, 78, 0.1);
-            border: 1px solid #E8E0C5;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease;
         }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .auth-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
+
+        .auth-header .icon {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
         .auth-header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            color: #1E4A6B;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #fff, #F7C35C);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
+
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
         .input-group {
             margin-bottom: 1rem;
         }
+
         .input-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.75rem;
             font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
         }
-        .input-group input, .input-group select {
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper input, .input-wrapper select {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #E2DAB3;
+            padding: 0.8rem 1rem 0.8rem 2.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            color: white;
+            transition: all 0.3s;
         }
+
+        .input-wrapper select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .input-wrapper select option {
+            background: #1a1a2e;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            outline: none;
+            border-color: #F7C35C;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(247, 195, 92, 0.3);
+        }
+
+        .input-wrapper input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .btn-auth {
             width: 100%;
-            background: #2C3E4E;
-            color: white;
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            color: #1a1a2e;
             border: none;
             padding: 0.8rem;
             border-radius: 40px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
-            margin-top: 1rem;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
         }
+
         .btn-auth:hover {
-            background: #F4A261;
+            transform: scale(0.98);
+            box-shadow: 0 10px 25px -5px rgba(247, 195, 92, 0.5);
         }
+
         .auth-footer {
             text-align: center;
             margin-top: 1.5rem;
+        }
+
+        .auth-footer p {
+            color: rgba(255, 255, 255, 0.6);
             font-size: 0.85rem;
         }
+
         .auth-footer a {
-            color: #F4A261;
+            color: #F7C35C;
             text-decoration: none;
+            font-weight: 600;
         }
-        .error-msg {
-            background: #FEE2E2;
-            color: #DC2626;
+
+        .alert {
             padding: 0.7rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            border-radius: 16px;
             margin-bottom: 1rem;
+            font-size: 0.8rem;
             display: none;
         }
-        .success-msg {
-            background: #D1FAE5;
-            color: #059669;
-            padding: 0.7rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-            display: none;
+
+        .alert-error {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            color: #FF6B6B;
         }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid rgba(39, 174, 96, 0.5);
+            color: #2ECC71;
+        }
+
         .role-hint {
-            font-size: 0.7rem;
-            color: #8B9A9E;
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
             margin-top: 0.3rem;
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation">
+        <div class="bubble" style="width: 250px; height: 250px; top: -80px; left: -80px;"></div>
+        <div class="bubble" style="width: 180px; height: 180px; top: 50%; right: -50px; animation-duration: 12s;"></div>
+        <div class="bubble" style="width: 120px; height: 120px; bottom: 10%; left: 10%; animation-duration: 15s;"></div>
+    </div>
+
+    <div class="waves">
+        <div class="wave"></div>
+    </div>
+
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h1>🧺 Laundry<span>Clean</span></h1>
-                <p style="color: #6B7A7F;">Daftar akun baru</p>
+                <div class="icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Buat Akun Baru</h1>
+                <p>Bergabung dengan LaundryClean 🎉</p>
             </div>
-            
-            <div id="errorMsg" class="error-msg"></div>
-            <div id="successMsg" class="success-msg"></div>
-            
+
+            <div id="errorMsg" class="alert alert-error"></div>
+            <div id="successMsg" class="alert alert-success"></div>
+
             <form id="registerForm">
                 <div class="input-group">
                     <label><i class="fas fa-user"></i> Nama Lengkap</label>
-                    <input type="text" id="fullname" required placeholder="John Doe">
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="fullname" placeholder="John Doe" required>
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="email" required placeholder="contoh@email.com">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="contoh@email.com" required>
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-phone"></i> No. Telepon</label>
-                    <input type="tel" id="phone" placeholder="08123456789">
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" placeholder="081234567890">
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="password" required placeholder="Minimal 6 karakter">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Minimal 6 karakter" required>
+                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-lock"></i> Konfirmasi Password</label>
-                    <input type="password" id="confirmPassword" required placeholder="Ulangi password">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" placeholder="Ulangi password" required>
+                        <i class="fas fa-eye toggle-password" id="toggleConfirmPassword"></i>
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-user-tag"></i> Daftar Sebagai</label>
-                    <select id="role">
-                        <option value="user">Pelanggan (User)</option>
-                        <option value="admin">Admin (Khusus Owner)</option>
-                    </select>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-tag"></i>
+                        <select id="role">
+                            <option value="user">👤 Pelanggan (User)</option>
+                            <option value="admin">👑 Admin (Pemilik Laundry)</option>
+                        </select>
+                    </div>
                     <div class="role-hint">*Akun admin hanya untuk pemilik laundry</div>
                 </div>
-                <button type="submit" class="btn-auth">Daftar Sekarang</button>
+
+                <button type="submit" class="btn-auth">
+                    <i class="fas fa-check-circle"></i> Daftar Sekarang
+                </button>
             </form>
-            
+
             <div class="auth-footer">
-                <p>Sudah punya akun? <a href="login.html">Login Disini</a></p>
+                <p>Sudah punya akun? <a href="login.html">Login Disini <i class="fas fa-arrow-right"></i></a></p>
             </div>
         </div>
     </div>
 
     <script>
-        const registerForm = document.getElementById('registerForm');
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
+        // Toggle password visibility
+        document.getElementById('togglePassword')?.addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        document.getElementById('toggleConfirmPassword')?.addEventListener('click', function() {
+            const password = document.getElementById('confirmPassword');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
 
         function getUsers() {
             const users = localStorage.getItem('laundry_users');
@@ -162,26 +388,24 @@
             localStorage.setItem('laundry_users', JSON.stringify(users));
         }
 
-        // Cek apakah sudah ada user admin? jika belum, buat default admin
-        function initDefaultAdmin() {
-            const users = getUsers();
-            const hasAdmin = users.some(u => u.role === 'admin');
-            if (!hasAdmin) {
-                users.push({
-                    id: Date.now(),
-                    name: 'Administrator',
-                    email: 'admin@laundry.com',
-                    phone: '08123456789',
-                    password: 'admin123',
-                    role: 'admin',
-                    createdAt: new Date().toISOString()
-                });
-                saveUsers(users);
-            }
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
         }
-        initDefaultAdmin();
 
-        registerForm.addEventListener('submit', (e) => {
+        function showSuccess(msg) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = msg;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        document.getElementById('registerForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             
             const fullname = document.getElementById('fullname').value.trim();
@@ -191,44 +415,33 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const role = document.getElementById('role').value;
             
-            // Validasi
             if (!fullname || !email || !password) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent = 'Harap isi semua field yang wajib!';
-                successMsg.style.display = 'none';
+                showError('Harap isi semua field yang wajib!');
                 return;
             }
             
             if (password.length < 6) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent = 'Password minimal 6 karakter!';
-                successMsg.style.display = 'none';
+                showError('Password minimal 6 karakter!');
                 return;
             }
             
             if (password !== confirmPassword) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent = 'Password dan konfirmasi password tidak cocok!';
-                successMsg.style.display = 'none';
+                showError('Password dan konfirmasi password tidak cocok!');
                 return;
             }
             
             const users = getUsers();
             
-            // Cek email sudah terdaftar
             if (users.some(u => u.email === email)) {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent = 'Email sudah terdaftar! Gunakan email lain.';
-                successMsg.style.display = 'none';
+                showError('Email sudah terdaftar! Gunakan email lain.');
                 return;
             }
             
-            // Simpan user baru
             const newUser = {
                 id: Date.now(),
                 name: fullname,
                 email: email,
-                phone: phone,
+                phone: phone || '-',
                 password: password,
                 role: role,
                 createdAt: new Date().toISOString()
@@ -237,9 +450,7 @@
             users.push(newUser);
             saveUsers(users);
             
-            successMsg.style.display = 'block';
-            successMsg.textContent = 'Registrasi berhasil! Mengalihkan ke halaman login...';
-            errorMsg.style.display = 'none';
+            showSuccess('✅ Registrasi berhasil! Mengalihkan ke halaman login...');
             
             setTimeout(() => {
                 window.location.href = 'login.html';

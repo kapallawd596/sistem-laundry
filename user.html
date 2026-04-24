@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>User Panel - LaundryClean</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .user-panel {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .service-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .service-card {
+            background: linear-gradient(135deg, #1E4A6B, #2C3E4E);
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        
+        .service-card i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #F7C35C;
+        }
+        
+        .service-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .service-card .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #F7C35C;
+        }
+        
+        .quick-form {
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-row input, .form-row select {
+            flex: 1;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            color: white;
+        }
+        
+        .form-row input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .btn-order {
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            color: #1a1a2e;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .price-preview {
+            background: rgba(0,0,0,0.3);
+            padding: 0.8rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        
+        .wallet-section {
+            background: linear-gradient(135deg, #27AE60, #219A52);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .queue-info {
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a2e;
+            text-align: center;
+        }
+        
+        .queue-number-big {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+        
+        .notification-badge {
+            background: #DC2626;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+        
+        .history-title {
+            margin: 1rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .status-ready {
+            background: #27AE60;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            animation: blinkReady 1s infinite;
+        }
+        
+        @keyframes blinkReady {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .btn-notif-test {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        
+        .btn-notif-test:hover {
+            background: #128C7E;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-panel">
+        <!-- Header -->
+        <div class="header">
+            <div class="top-bar">
+                <div class="datetime-container">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDateUser"></span>
+                    <i class="fas fa-clock" style="margin-left: 1rem;"></i>
+                    <span id="clockUser">--:--:--</span>
+                </div>
+                <div class="user-bar">
+                    <div class="user-greeting">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userNameDisplay">User</span>
+                    </div>
+                    <button class="btn-logout-small" id="logoutBtnUser">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            <h1>🧺 Laundry<span>Clean</span></h1>
+            <p>Pilih layanan laundry favorit Anda • Cashless • QRIS • Notifikasi WhatsApp</p>
+            <div class="rainbow-divider"></div>
+        </div>
+
+        <!-- Info Antrian -->
+        <div class="queue-info">
+            <i class="fas fa-ticket-alt"></i> Nomor Antrian Anda Saat Ini:
+            <div class="queue-number-big" id="myQueueNumber">-</div>
+            <small>Simpan nomor antrian untuk cek status pesanan</small>
+        </div>
+
+        <!-- Wallet Section -->
+        <div class="wallet-section">
+            <div>
+                <i class="fas fa-wallet" style="font-size: 1.5rem;"></i>
+                <span style="margin-left: 0.5rem;">Saldo Dompet</span>
+            </div>
+            <div>
+                <strong style="font-size: 1.5rem;" id="userBalanceDisplay">Rp 0</strong>
+                <button class="btn-topup" id="topUpBtn" style="margin-left: 1rem; background: rgba(255,255,255,0.2);">
+                    <i class="fas fa-plus-circle"></i> Top Up
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Input No WhatsApp -->
+        <div class="quick-form">
+            <h3><i class="fab fa-whatsapp"></i> Nomor WhatsApp untuk Notifikasi</h3>
+            <div class="form-row">
+                <input type="tel" id="userWhatsapp" placeholder="Contoh: 6281234567890 (tanpa + atau 0 di awal)" value="">
+                <small style="color: #F7C35C; font-size: 0.7rem;">*Kami akan mengirim notifikasi via WhatsApp saat laundry selesai</small>
+            </div>
+            <button class="btn-secondary" id="saveWaBtn" style="background: #25D366; width: auto; padding: 0.5rem 1rem;">
+                <i class="fab fa-whatsapp"></i> Simpan Nomor WA
+            </button>
+        </div>
+
+        <!-- Service Selection Cards -->
+        <h3 style="margin-bottom: 1rem;"><i class="fas fa-tags"></i> Pilih Jenis Layanan</h3>
+        <div class="service-cards">
+            <div class="service-card" onclick="selectService('reguler')">
+                <i class="fas fa-tshirt"></i>
+                <h3>Cuci Kering</h3>
+                <div class="price">Rp 8.000/kg</div>
+                <div class="desc">Cuci + kering • 3 hari selesai</div>
+            </div>
+            <div class="service-card" onclick="selectService('express')">
+                <i class="fas fa-bolt"></i>
+                <h3>Cuci Express</h3>
+                <div class="price">Rp 12.000/kg</div>
+                <div class="desc">Cuci + kering • 1 hari selesai</div>
+            </div>
+            <div class="service-card" onclick="selectService('setrika')">
+                <i class="fas fa-iron"></i>
+                <h3>Setrika Saja</h3>
+                <div class="price">Rp 5.000/kg</div>
+                <div class="desc">Setrika rapi • 2 hari selesai</div>
+            </div>
+        </div>
+
+        <!-- Quick Order Form -->
+        <div class="quick-form">
+            <h3><i class="fas fa-shopping-cart"></i> Pesan Laundry Sekarang</h3>
+            <div class="form-row">
+                <input type="text" id="orderName" placeholder="Nama lengkap Anda" required>
+                <input type="number" id="orderWeight" step="0.1" placeholder="Berat (kg)" required>
+            </div>
+            <div class="form-row">
+                <select id="orderService">
+                    <option value="reguler">Cuci Kering - Rp 8.000/kg</option>
+                    <option value="express">Cuci Express - Rp 12.000/kg</option>
+                    <option value="setrika">Setrika Saja - Rp 5.000/kg</option>
+                </select>
+            </div>
+            <div class="price-preview" id="pricePreview">
+                💰 Total: Rp 0
+            </div>
+            <button class="btn-order" id="orderBtn">
+                <i class="fas fa-paper-plane"></i> Pesan Sekarang & Ambil Antrian
+            </button>
+        </div>
+
+        <!-- Riwayat Pesanan -->
+        <h3 class="history-title"><i class="fas fa-history"></i> Riwayat Pesanan Saya</h3>
+        <div class="card glass-card">
+            <div class="table-wrapper">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>No. Antri</th>
+                            <th>Layanan</th>
+                            <th>Berat</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Pembayaran</th>
+                            <th>Notifikasi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userOrdersTable">
+                        <tr><td colspan="8" style="text-align: center;">Loading...</td><ee>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 LaundryClean • Layanan 24 Jam • Customer Service: 0812-3456-7890</p>
+        </footer>
+    </div>
+
+    <!-- Modal Top Up -->
+    <div id="topupModal" class="modal">
+        <div class="modal-content glass-card">
+            <h3><i class="fas fa-wallet"></i> Top Up Saldo</h3>
+            <div class="wallet-info">
+                <p>Saldo saat ini: <strong id="currentBalance">Rp 0</strong></p>
+            </div>
+            <input type="number" id="topupAmount" step="10000" placeholder="💰 Masukkan nominal (min Rp 10.000)">
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeTopupBtn">Batal</button>
+                <button class="btn-primary" id="confirmTopupBtn">Top Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal QR Payment -->
+    <div id="qrPaymentModal" class="modal">
+        <div class="modal-content payment-modal glass-card">
+            <h3><i class="fas fa-qrcode"></i> Scan QRIS untuk Membayar</h3>
+            <div id="qrCodeContainer" style="display: flex; justify-content: center; margin: 1rem 0;"></div>
+            <div class="payment-details">
+                <p><strong>Total Bayar:</strong> <span id="qrPaymentAmount">Rp 0</span></p>
+                <p><i class="fab fa-google-pay"></i> <i class="fab fa-apple-pay"></i> GoPay, OVO, Dana, LinkAja</p>
+            </div>
+            <div class="payment-actions">
+                <button class="btn-secondary" id="closeQrModalBtn">Batal</button>
+                <button class="btn-primary" id="confirmQrPaymentBtn">Sudah Bayar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // User panel specific functions
+        let selectedServiceValue = 'reguler';
+        let currentUserData = null;
+        
+        function selectService(service) {
+            selectedServiceValue = service;
+            const serviceSelect = document.getElementById('orderService');
+            if (serviceSelect) {
+                serviceSelect.value = service;
+            }
+            document.querySelectorAll('.service-card').forEach(card => {
+                card.style.opacity = '0.7';
+            });
+            event.currentTarget.style.opacity = '1';
+            updatePricePreview();
+        }
+        
+        function updatePricePreview() {
+            const weight = parseFloat(document.getElementById('orderWeight').value) || 0;
+            const service = document.getElementById('orderService').value;
+            let pricePerKg = 8000;
+            if (service === 'express') pricePerKg = 12000;
+            if (service === 'setrika') pricePerKg = 5000;
+            const total = weight * pricePerKg;
+            document.getElementById('pricePreview').innerHTML = `💰 Total: Rp ${total.toLocaleString('id-ID')}`;
+        }
+        
+        // Load user whatsapp number
+        function loadUserWhatsapp() {
+            const userId = currentUserData?.id;
+            const waNumbers = JSON.parse(localStorage.getItem('user_whatsapp') || '{}');
+            if (waNumbers[userId]) {
+                document.getElementById('userWhatsapp').value = waNumbers[userId];
+            }
+        }
+        
+        function saveUserWhatsapp() {
+            const waNumber = document.getElementById('userWhatsapp').value.trim();
+            if (waNumber) {
+                const waNumbers = JSON.parse(localStorage.getItem('user_whatsapp') || '{}');
+                waNumbers[currentUserData.id] = waNumber;
+                localStorage.setItem('user_whatsapp', JSON.stringify(waNumbers));
+                showNotification('Nomor WhatsApp berhasil disimpan!', 'success');
+            } else {
+                showNotification('Masukkan nomor WhatsApp yang valid!', 'error');
+            }
+        }
+        
+        function getUserWhatsapp(userId) {
+            const waNumbers = JSON.parse(localStorage.getItem('user_whatsapp') || '{}');
+            return waNumbers[userId] || null;
+        }
+        
+        // Update queue number display
+        function updateMyQueueNumber() {
+            const orders = JSON.parse(localStorage.getItem('laundryClean') || '[]');
+            const myOrders = orders.filter(o => o.userId === currentUserData?.id && o.status !== 'selesai');
+            if (myOrders.length > 0) {
+                document.getElementById('myQueueNumber').innerHTML = myOrders.map(o => `🎫 ${o.queueNumber || '-'}`).join(' • ');
+            } else {
+                document.getElementById('myQueueNumber').innerHTML = 'Belum ada antrian aktif';
+            }
+        }
+        
+        // Render user orders with notification status
+        function renderUserOrders() {
+            const orders = JSON.parse(localStorage.getItem('laundryClean') || '[]');
+            const myOrders = orders.filter(o => o.userId === currentUserData?.id).reverse();
+            const tbody = document.getElementById('userOrdersTable');
+            
+            if (myOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Belum ada pesanan</td><ee>`;
+                return;
+            }
+            
+            tbody.innerHTML = myOrders.map(order => {
+                let price = 8000;
+                if (order.serviceType === 'express') price = 12000;
+                if (order.serviceType === 'setrika') price = 5000;
+                const total = order.weight * price;
+                
+                let statusHtml = '';
+                if (order.status === 'menunggu') statusHtml = '<span class="status-menunggu">⏳ Menunggu</span>';
+                else if (order.status === 'proses') statusHtml = '<span class="status-proses">🔄 Diproses</span>';
+                else statusHtml = '<span class="status-selesai status-ready">✅ Selesai! <i class="fas fa-bell"></i></span>';
+                
+                const paymentHtml = order.paymentStatus === 'paid' 
+                    ? '<span class="payment-paid">✅ Lunas</span>'
+                    : '<span class="payment-unpaid">⏳ Belum</span>';
+                
+                const notifSent = order.notificationSent ? '✅ Sudah' : '⏳ Belum';
+                
+                const actionHtml = order.status === 'selesai' && order.paymentStatus !== 'paid'
+                    ? `<button class="btn-pay-table" onclick="payWithQR(${order.id}, ${total})"><i class="fas fa-qrcode"></i> Bayar</button>`
+                    : (order.paymentStatus === 'unpaid' ? `<button class="btn-pay-table" onclick="openQrPaymentUser(${order.id}, ${total})"><i class="fas fa-qrcode"></i> QRIS</button>` : '-');
+                
+                return `
+                    <tr>
+                        <td>${order.queueNumber || '-'}</td>
+                        <td>${order.serviceType}</td>
+                        <td>${order.weight} kg</td>
+                        <td>Rp ${total.toLocaleString('id-ID')}</td>
+                        <td>${statusHtml}</td>
+                        <td>${paymentHtml}</td>
+                        <td><small>${notifSent}</small></td>
+                        <td>${actionHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            updateMyQueueNumber();
+        }
+        
+        function openQrPaymentUser(orderId, amount) {
+            document.getElementById('qrPaymentAmount').innerText = 'Rp ' + amount.toLocaleString('id-ID');
+            const qrContainer = document.getElementById('qrCodeContainer');
+            qrContainer.innerHTML = '';
+            const qrData = `LAUNDRY|${orderId}|${Date.now()}|${amount}`;
+            try {
+                new QRCode(qrContainer, {
+                    text: qrData,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#F7C35C",
+                    colorLight: "#1a1a2e"
+                });
+            } catch(e) {
+                qrContainer.innerHTML = `<div style="width:200px;height:200px;background:#F7C35C;display:flex;align-items:center;justify-content:center;border-radius:16px;">
+                    <i class="fas fa-qrcode" style="font-size:4rem;"></i>
+                </div>`;
+            }
+            document.getElementById('qrPaymentModal').classList.add('active');
+            window.pendingPaymentId = orderId;
+            window.pendingPaymentAmount = amount;
+        }
+        
+        document.getElementById('orderWeight')?.addEventListener('input', updatePricePreview);
+        document.getElementById('orderService')?.addEventListener('change', updatePricePreview);
+        document.getElementById('saveWaBtn')?.addEventListener('click', saveUserWhatsapp);
+        
+        document.getElementById('confirmQrPaymentBtn')?.addEventListener('click', () => {
+            if (window.pendingPaymentId && window.pendingPaymentAmount) {
+                let orders = JSON.parse(localStorage.getItem('laundryClean') || '[]');
+                const index = orders.findIndex(l => l.id === window.pendingPaymentId);
+                if (index !== -1) {
+                    orders[index].paymentStatus = 'paid';
+                    localStorage.setItem('laundryClean', JSON.stringify(orders));
+                    showNotification('✅ Pembayaran berhasil! Terima kasih.', 'success');
+                    document.getElementById('qrPaymentModal').classList.remove('active');
+                    renderUserOrders();
+                    updateUserBalanceDisplay();
+                }
+            }
+        });
+        
+        document.getElementById('closeQrModalBtn')?.addEventListener('click', () => {
+            document.getElementById('qrPaymentModal').classList.remove('active');
+        });
+        
+        // Initialization for user page
+        currentUserData = JSON.parse(localStorage.getItem('laundry_current_user') || '{}');
+        if (currentUserData.id) {
+            loadUserWhatsapp();
+            renderUserOrders();
+            updateUserBalanceDisplay();
+        }
+        
+        // Clock
+        function updateUserClock() {
+            const now = new Date();
+            document.getElementById('currentDateUser').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('clockUser').innerText = now.toLocaleTimeString('id-ID');
+        }
+        updateUserClock();
+        setInterval(updateUserClock, 1000);
+        
+        // Periodically check for status updates
+        setInterval(() => {
+            renderUserOrders();
+            updateUserBalanceDisplay();
+        }, 5000);
+    </script>
+</body>
+</html>

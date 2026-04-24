@@ -2,152 +2,539 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - LaundryClean</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Login - LaundryClean | Sistem Laundry Modern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #F4F1E1 0%, #E8E0C5 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow-x: hidden;
         }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .bubble {
+            position: absolute;
+            background: radial-gradient(circle, rgba(247, 195, 92, 0.2), transparent);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translateY(-100px) translateX(50px) rotate(90deg);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-200px) translateX(-50px) rotate(180deg);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translateY(-100px) translateX(100px) rotate(270deg);
+                opacity: 0.7;
+            }
+        }
+
+        /* Wave Effect */
+        .waves {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            z-index: 0;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(247,195,92,0.1)" d="M0,192L48,197.3C96,203,192,213,288,208C384,203,480,181,576,186.7C672,192,768,224,864,229.3C960,235,1056,213,1152,192C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') repeat-x;
+            background-size: cover;
+            animation: wave 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        .wave:nth-child(2) {
+            bottom: 20px;
+            opacity: 0.2;
+            animation: wave 15s linear infinite reverse;
+        }
+
+        @keyframes wave {
+            0% { background-position-x: 0; }
+            100% { background-position-x: 1440px; }
+        }
+
+        /* Main Container */
         .auth-container {
-            max-width: 420px;
-            width: 90%;
-        }
-        .auth-card {
-            background: white;
-            border-radius: 32px;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 2rem;
-            box-shadow: 20px 20px 0 rgba(44, 62, 78, 0.1);
-            border: 1px solid #E8E0C5;
         }
+
+        .auth-card {
+            max-width: 450px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .auth-header {
             text-align: center;
             margin-bottom: 2rem;
         }
+
+        .auth-header .icon {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         .auth-header h1 {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
-            color: #1E4A6B;
+            background: linear-gradient(135deg, #fff, #F7C35C);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.3rem;
         }
-        .auth-header h1 span {
-            color: #F4A261;
+
+        .auth-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
         }
+
         .input-group {
             margin-bottom: 1.2rem;
         }
+
         .input-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            color: #2C3E4E;
+            color: rgba(255, 255, 255, 0.8);
         }
-        .input-group input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #E2DAB3;
-            border-radius: 16px;
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
             font-size: 1rem;
-            transition: all 0.2s;
         }
-        .input-group input:focus {
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .input-wrapper input:focus {
             outline: none;
             border-color: #F7C35C;
-            box-shadow: 0 0 0 3px rgba(247, 195, 92, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(247, 195, 92, 0.3);
         }
+
+        .input-wrapper input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
         .btn-auth {
             width: 100%;
-            background: #2C3E4E;
-            color: white;
+            background: linear-gradient(135deg, #F7C35C, #F4A261);
+            color: #1a1a2e;
             border: none;
-            padding: 0.8rem;
+            padding: 0.9rem;
             border-radius: 40px;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
-            margin-top: 0.5rem;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
+
         .btn-auth:hover {
-            background: #F4A261;
-            color: #1E2F3A;
+            transform: scale(0.98);
+            box-shadow: 0 10px 25px -5px rgba(247, 195, 92, 0.5);
         }
+
+        .btn-auth:active {
+            transform: scale(0.96);
+        }
+
+        .btn-auth .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-auth .btn-glow {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-auth:hover .btn-glow {
+            left: 100%;
+        }
+
         .auth-footer {
             text-align: center;
             margin-top: 1.5rem;
+        }
+
+        .auth-footer p {
+            color: rgba(255, 255, 255, 0.6);
             font-size: 0.85rem;
         }
+
         .auth-footer a {
-            color: #F4A261;
+            color: #F7C35C;
             text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        .error-msg {
-            background: #FEE2E2;
-            color: #DC2626;
-            padding: 0.7rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            margin-bottom: 1rem;
-            display: none;
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+            color: #F4A261;
         }
-        .success-msg {
-            background: #D1FAE5;
-            color: #059669;
-            padding: 0.7rem;
-            border-radius: 12px;
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: rgba(255, 255, 255, 0.4);
             font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            margin: 0 0.8rem;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            font-size: 0.85rem;
+        }
+
+        .social-btn i {
+            margin-right: 0.5rem;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 0.8rem;
+            border-radius: 16px;
             margin-bottom: 1rem;
+            font-size: 0.85rem;
             display: none;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .alert-error {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid rgba(220, 38, 38, 0.5);
+            color: #FF6B6B;
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid rgba(39, 174, 96, 0.5);
+            color: #2ECC71;
+        }
+
+        /* Laundry illustration */
+        .laundry-float {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .laundry-float i {
+            font-size: 4rem;
+            animation: rotateSlow 10s linear infinite;
+        }
+
+        @keyframes rotateSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 1.5rem;
+            }
+            .laundry-float {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation">
+        <div class="bubble" style="width: 300px; height: 300px; top: -100px; left: -100px; animation-duration: 20s;"></div>
+        <div class="bubble" style="width: 200px; height: 200px; top: 50%; right: -50px; animation-duration: 15s; animation-delay: 2s;"></div>
+        <div class="bubble" style="width: 150px; height: 150px; bottom: 10%; left: 20%; animation-duration: 18s; animation-delay: 5s;"></div>
+        <div class="bubble" style="width: 100px; height: 100px; top: 20%; right: 15%; animation-duration: 12s; animation-delay: 1s;"></div>
+        <div class="bubble" style="width: 250px; height: 250px; bottom: -50px; right: 10%; animation-duration: 25s;"></div>
+    </div>
+
+    <div class="waves">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+
+    <div class="laundry-float">
+        <i class="fas fa-tshirt"></i>
+        <i class="fas fa-jug-detergent" style="margin-left: 1rem;"></i>
+        <i class="fas fa-water" style="margin-left: 1rem;"></i>
+    </div>
+
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
-                <h1>🧺 Laundry<span>Clean</span></h1>
-                <p style="color: #6B7A7F; margin-top: 0.5rem;">Login ke akun Anda</p>
+                <div class="icon">
+                    <i class="fas fa-soap"></i>
+                </div>
+                <h1>Laundry<span style="color: #F7C35C;">Clean</span></h1>
+                <p>Selamat datang kembali! 👋</p>
             </div>
-            
-            <div id="errorMsg" class="error-msg"></div>
-            <div id="successMsg" class="success-msg"></div>
-            
+
+            <div id="errorMsg" class="alert alert-error"></div>
+            <div id="successMsg" class="alert alert-success"></div>
+
             <form id="loginForm">
                 <div class="input-group">
-                    <label><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" id="email" required placeholder="contoh@email.com">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="contoh@email.com" required autocomplete="email">
+                    </div>
                 </div>
+
                 <div class="input-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="password" required placeholder="******">
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
                 </div>
-                <button type="submit" class="btn-auth">Login</button>
+
+                <button type="submit" class="btn-auth">
+                    <span class="btn-text"><i class="fas fa-arrow-right-to-bracket"></i> Login Sekarang</span>
+                    <span class="btn-glow"></span>
+                </button>
             </form>
-            
+
+            <div class="divider">
+                <span>atau</span>
+            </div>
+
+            <div class="social-login">
+                <div class="social-btn" onclick="demoLogin('user')">
+                    <i class="fas fa-user"></i> Demo User
+                </div>
+                <div class="social-btn" onclick="demoLogin('admin')">
+                    <i class="fas fa-shield-alt"></i> Demo Admin
+                </div>
+            </div>
+
             <div class="auth-footer">
-                <p>Belum punya akun? <a href="register.html">Daftar Sekarang</a></p>
-                <p><a href="forgot-pw.html">Lupa Password?</a></p>
+                <p>Belum punya akun? <a href="register.html">Daftar Sekarang <i class="fas fa-arrow-right"></i></a></p>
+                <p style="margin-top: 0.5rem;"><a href="forgot-pw.html"><i class="fas fa-key"></i> Lupa Password?</a></p>
             </div>
         </div>
     </div>
 
     <script>
-        const loginForm = document.getElementById('loginForm');
-        const errorMsg = document.getElementById('errorMsg');
-        const successMsg = document.getElementById('successMsg');
+        // Toggle password visibility
+        document.getElementById('togglePassword')?.addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
 
-        // Ambil data users dari localStorage
+        // Get users
         function getUsers() {
             const users = localStorage.getItem('laundry_users');
             return users ? JSON.parse(users) : [];
         }
 
-        loginForm.addEventListener('submit', (e) => {
+        // Demo login
+        window.demoLogin = function(role) {
+            const users = getUsers();
+            let demoUser;
+            
+            if (role === 'admin') {
+                demoUser = users.find(u => u.role === 'admin');
+                if (!demoUser) {
+                    alert('Akun admin tidak ditemukan! Silakan registrasi admin terlebih dahulu.');
+                    return;
+                }
+            } else {
+                demoUser = users.find(u => u.role === 'user');
+                if (!demoUser) {
+                    alert('Akun user tidak ditemukan! Silakan registrasi terlebih dahulu.');
+                    return;
+                }
+            }
+            
+            if (demoUser) {
+                localStorage.setItem('laundry_current_user', JSON.stringify({
+                    id: demoUser.id,
+                    name: demoUser.name,
+                    email: demoUser.email,
+                    role: demoUser.role
+                }));
+                
+                showSuccess('Login demo berhasil! Mengalihkan...');
+                setTimeout(() => {
+                    if (demoUser.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'user.html';
+                    }
+                }, 1500);
+            }
+        };
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showSuccess(msg) {
+            const successDiv = document.getElementById('successMsg');
+            successDiv.textContent = msg;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        // Handle login
+        document.getElementById('loginForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value.trim();
@@ -157,7 +544,6 @@
             const user = users.find(u => u.email === email && u.password === password);
             
             if (user) {
-                // Simpan session user
                 localStorage.setItem('laundry_current_user', JSON.stringify({
                     id: user.id,
                     name: user.name,
@@ -165,23 +551,38 @@
                     role: user.role
                 }));
                 
-                successMsg.style.display = 'block';
-                successMsg.textContent = 'Login berhasil! Mengalihkan...';
-                errorMsg.style.display = 'none';
+                showSuccess('✅ Login berhasil! Selamat datang kembali...');
                 
                 setTimeout(() => {
                     if (user.role === 'admin') {
                         window.location.href = 'admin.html';
                     } else {
-                        window.location.href = 'index.html';
+                        window.location.href = 'user.html';
                     }
                 }, 1500);
             } else {
-                errorMsg.style.display = 'block';
-                errorMsg.textContent = 'Email atau password salah!';
-                successMsg.style.display = 'none';
+                showError('❌ Email atau password salah! Silakan coba lagi.');
             }
         });
+
+        // Create default admin if not exists
+        function initDefaultAdmin() {
+            const users = getUsers();
+            const hasAdmin = users.some(u => u.role === 'admin');
+            if (!hasAdmin) {
+                users.push({
+                    id: Date.now(),
+                    name: 'Administrator',
+                    email: 'admin@laundry.com',
+                    phone: '08123456789',
+                    password: 'admin123',
+                    role: 'admin',
+                    createdAt: new Date().toISOString()
+                });
+                localStorage.setItem('laundry_users', JSON.stringify(users));
+            }
+        }
+        initDefaultAdmin();
     </script>
 </body>
 </html>
