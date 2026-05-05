@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Laundry int </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="fas fa-tshirt"></i>
+        <h2></h2>
+      </div>
+      <p style="font-size: 0.75rem; margin-top: 0.5rem;">Admin Panel</p>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-iLaundryProtem active" data-page="dashboard">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </div>
+      <div class="menu-item" data-page="pesanan">
+        <i class="fas fa-receipt"></i>
+        <span>Pesanan</span>
+      </div>
+      <div class="menu-item" data-page="pelanggan">
+        <i class="fas fa-users"></i>
+        <span>Pelanggan</span>
+      </div>
+      <div class="menu-item" data-page="layanan">
+        <i class="fas fa-tags"></i>
+        <span>Layanan</span>
+      </div>
+      <div class="menu-item" data-page="laporan">
+        <i class="fas fa-chart-pie"></i>
+        <span>Laporan</span>
+      </div>
+      <div class="menu-item" data-page="users">
+        <i class="fas fa-user-shield"></i>
+        <span>Manajemen User</span>
+      </div>
+      <div class="menu-item" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="main-content">
+    <div class="top-bar">
+      <h3 id="pageTitle">Dashboard</h3>
+      <div class="user-info">
+        <span id="userName">Admin</span>
+        <div class="user-avatar" id="userAvatar">A</div>
+      </div>
+    </div>
+    
+    <div id="pageContent"></div>
+  </div>
+  
+  <script src="../js/api.js"></script>
+  <script>
+    let currentPage = 'dashboard';
+    
+    async function loadPage(page) {
+      currentPage = page;
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === page) {
+          item.classList.add('active');
+        }
+      });
+      
+      document.getElementById('pageTitle').innerText = 
+        page.charAt(0).toUpperCase() + page.slice(1);
+      
+      if (page === 'dashboard') await loadDashboard();
+      else if (page === 'pesanan') await loadPesanan();
+      else if (page === 'pelanggan') await loadPelanggan();
+      else if (page === 'layanan') await loadLayanan();
+      else if (page === 'laporan') await loadLaporan();
+      else if (page === 'users') await loadUsers();
+    }
+    
+    async function loadDashboard() {
+      const stats = await LaundryAPI.getStatistik();
+      const aktivitas = await LaundryAPI.getAktivitas();
+      
+      const html = `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #dbeafe;"><i class="fas fa-receipt" style="color: #4361ee;"></i></div>
+            <div class="stat-value">${stats.totalPesanan}</div>
+            <div class="stat-label">Total Pesanan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #d1fae5;"><i class="fas fa-money-bill-wave" style="color: #10b981;"></i></div>
+            <div class="stat-value">Rp ${(stats.totalPendapatan || 0).toLocaleString()}</div>
+            <div class="stat-label">Total Pendapatan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #fed7aa;"><i class="fas fa-spinner" style="color: #f59e0b;"></i></div>
+            <div class="stat-value">${stats.pesananProses}</div>
+            <div class="stat-label">Dalam Proses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: #fee2e2;"><i class="fas fa-users" style="color: #ef4444;"></i></div>
+            <div class="stat-value">${stats.totalPelanggan}</div>
+            <div class="stat-label">Pelanggan</div>
+          </div>
+        </div>
+        
+        <div class="table-container" style="margin-top: 1.5rem;">
+          <table>
+            <thead>
+              <tr><th>Aktivitas Terkini</th><th>Waktu</th></tr>
+            </thead>
+            <tbody>
+              ${aktivitas.map(a => `
+                <tr>
+                  <td>${a.deskripsi}</td>
+                  <td>${new Date(a.createdAt).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+    }
+    
+    async function loadPesanan() {
+      const pesanan = await LaundryAPI.getPesanan();
+      const layanan = await LaundryAPI.getLayanan();
+      
+      const html = `
+        <button class="btn btn-primary" onclick="showTambahPesanan()" style="margin-bottom: 1rem;">
+          <i class="fas fa-plus"></i> Tambah Pesanan
+        </button>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pesanan.map(p => `
+                <tr>
+                  <td>${p.kode}</td>
+                  <td>${p.pelangganNama}</td>
+                  <td>${p.layananNama}</td>
+                  <td>${p.berat} kg</td>
+                  <td>Rp ${p.totalBayar.toLocaleString()}</td>
+                  <td><span class="badge badge-${p.status === 'selesai' ? 'success' : p.status === 'proses' ? 'warning' : 'info'}">${p.status}</span></td>
+                  <td>
+                    <button class="btn btn-sm" onclick="editPesanan(${p.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePesanan(${p.id})">Hapus</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+    }
+    
+    async function loadPelanggan() {
+      const pelanggan = await LaundryAPI.getPelanggan();
+      
+      const html = `
+        <button class="btn btn-primary" onclick="showTambahPelanggan()" style="margin-bottom: 1rem;">
+          <i class="fas fa-plus"></i> Tambah Pelanggan
+        </button>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Nama</th><th>Email</th><th>No HP</th><th>Poin</th><th>Total Transaksi</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+              ${pelanggan.map(p => `
+                <tr>
+                  <td>${p.nama}</td>
+                  <td>${p.email || '-'}</td>
+                  <td>${p.no_hp}</td>
+                  <td>${p.poin || 0}</td>
+                  <td>${p.totalTransaksi || 0}</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="editPelanggan(${p.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deletePelanggan(${p.id})">Hapus</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+    }
+    
+    async function loadLayanan() {
+      const layanan = await LaundryAPI.getLayanan();
+      
+      const html = `
+        <button class="btn btn-primary" onclick="showTambahLayanan()" style="margin-bottom: 1rem;">
+          <i class="fas fa-plus"></i> Tambah Layanan
+        </button>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Nama Layanan</th><th>Harga/kg</th><th>Estimasi</th><th>Deskripsi</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+              ${layanan.map(l => `
+                <tr>
+                  <td><i class="fas ${l.icon || 'fa-tshirt'}"></i> ${l.nama}</td>
+                  <td>Rp ${l.harga.toLocaleString()}</td>
+                  <td>${l.estimasi}</td>
+                  <td>${l.deskripsi}</td>
+                  <td>
+                    <button class="btn btn-sm" onclick="editLayanan(${l.id})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteLayanan(${l.id})">Hapus</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+    }
+    
+    async function loadLaporan() {
+      const stats = await LaundryAPI.getStatistik();
+      
+      const html = `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">${stats.totalPesanan}</div>
+            <div class="stat-label">Total Pesanan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">Rp ${(stats.totalPendapatan || 0).toLocaleString()}</div>
+            <div class="stat-label">Total Pendapatan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.totalPelanggan}</div>
+            <div class="stat-label">Pelanggan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.totalLayanan}</div>
+            <div class="stat-label">Layanan Aktif</div>
+          </div>
+        </div>
+        
+        <div class="table-container" style="margin-top: 1.5rem;">
+          <h4 style="padding: 1rem;">Grafik Pendapatan per Hari</h4>
+          <canvas id="revenueChart" style="max-height: 300px; padding: 1rem;"></canvas>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+      
+      // Load chart.js untuk grafik
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+      script.onload = () => {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: stats.pendapatanPerHari?.map(d => d.tanggal) || [],
+            datasets: [{
+              label: 'Pendapatan',
+              data: stats.pendapatanPerHari?.map(d => d.total) || [],
+              borderColor: '#4361ee',
+              tension: 0.4
+            }]
+          }
+        });
+      };
+      document.body.appendChild(script);
+    }
+    
+    async function loadUsers() {
+      const users = await LaundryAPI.getUsers();
+      
+      const html = `
+        <button class="btn btn-primary" onclick="showTambahUser()" style="margin-bottom: 1rem;">
+          <i class="fas fa-plus"></i> Tambah User
+        </button>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Nama</th><th>Email</th><th>Role</th><th>No HP</th><th>Aksi</th></tr>
+            </thead>
+            <tbody>
+              ${users.map(u => `
+                <tr>
+                  <td>${u.nama}</td>
+                  <td>${u.email}</td>
+                  <td><span class="badge badge-${u.role === 'admin' ? 'danger' : u.role === 'operator' ? 'warning' : 'info'}">${u.role}</span></td>
+                  <td>${u.no_hp}</td>
+                  <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">Hapus</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('pageContent').innerHTML = html;
+    }
+    
+    // Event Listeners
+    document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+      item.addEventListener('click', () => loadPage(item.getAttribute('data-page')));
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', () => LaundryAPI.logout());
+    
+    // Set user info
+    const user = LaundryAPI.getCurrentUser();
+    if (user) {
+      document.getElementById('userName').innerText = user.nama;
+      document.getElementById('userAvatar').innerText = user.nama.charAt(0);
+    }
+    
+    loadDashboard();
+  </script>
+</body>
+</html>
