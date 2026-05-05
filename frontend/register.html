@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - Laundry int </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .register-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #4361ee;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            color: #1e293b;
+            margin-top: 0.5rem;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.875rem;
+        }
+
+        .form-label.required::after {
+            content: "*";
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .input-group:focus-within {
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .input-group i {
+            padding: 0 1rem;
+            color: #94a3b8;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            flex: 1;
+            padding: 0.75rem 1rem 0.75rem 0;
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: transparent;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            padding: 0.75rem 1rem 0.75rem 0;
+        }
+
+        .password-strength {
+            margin-top: 0.5rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 0.25rem;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-text {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #4361ee, #3730a3);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .login-link a {
+            color: #4361ee;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .terms {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .terms a {
+            color: #4361ee;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .register-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="logo">
+                <i class="fas fa-tshirt"></i>
+                <h1>Laundry int </h1>
+                <p>Daftar akun baru</p>
+            </div>
+
+            <div id="alertMessage" class="hidden"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label class="form-label required">Nama Lengkap</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="nama" placeholder="Masukkan nama lengkap" required>
+                    </div>
+                    <div class="error-message" id="namaError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="contoh@email.com" required>
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Nomor HP</label>
+                    <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="no_hp" placeholder="08xxxxxxxxxx" required>
+                    </div>
+                    <div class="error-message" id="hpError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Alamat (Opsional)</label>
+                    <div class="input-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <textarea id="alamat" rows="2" placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan, Kota"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Minimal 6 karakter" required>
+                        <i class="fas fa-eye-slash" id="togglePassword" style="cursor: pointer; padding-right: 1rem;"></i>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText"></div>
+                    </div>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required">Konfirmasi Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirm_password" placeholder="Ulangi password" required>
+                        <i class="fas fa-eye-slash" id="toggleConfirmPassword" style="cursor: pointer; padding-right: 1rem;"></i>
+                    </div>
+                    <div class="error-message" id="confirmError"></div>
+                </div>
+
+                <button type="submit" class="btn-register" id="registerBtn">
+                    <i class="fas fa-user-plus"></i> Daftar Sekarang
+                </button>
+            </form>
+
+            <div class="login-link">
+                Sudah punya akun? <a href="login.html">Login di sini</a>
+            </div>
+
+            <div class="terms">
+                Dengan mendaftar, Anda menyetujui <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> kami.
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // DOM Elements
+        const form = document.getElementById('registerForm');
+        const namaInput = document.getElementById('nama');
+        const emailInput = document.getElementById('email');
+        const hpInput = document.getElementById('no_hp');
+        const alamatInput = document.getElementById('alamat');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm_password');
+        const registerBtn = document.getElementById('registerBtn');
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+
+        // Error elements
+        const namaError = document.getElementById('namaError');
+        const emailError = document.getElementById('emailError');
+        const hpError = document.getElementById('hpError');
+        const passwordError = document.getElementById('passwordError');
+        const confirmError = document.getElementById('confirmError');
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.classList.toggle('fa-eye');
+            togglePassword.classList.toggle('fa-eye-slash');
+        });
+
+        toggleConfirmPassword.addEventListener('click', () => {
+            const type = confirmInput.type === 'password' ? 'text' : 'password';
+            confirmInput.type = type;
+            toggleConfirmPassword.classList.toggle('fa-eye');
+            toggleConfirmPassword.classList.toggle('fa-eye-slash');
+        });
+
+        // Password strength checker
+        function checkPasswordStrength() {
+            const password = passwordInput.value;
+            
+            if (!password) {
+                strengthFill.style.width = '0%';
+                strengthFill.style.backgroundColor = '#e2e8f0';
+                strengthText.textContent = '';
+                return;
+            }
+
+            let strength = 0;
+            let color = '';
+            let text = '';
+
+            // Length check
+            if (password.length >= 6) strength++;
+            if (password.length >= 10) strength++;
+            
+            // Character type checks
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            // Determine strength level (max 6)
+            if (strength <= 2) {
+                strength = 25;
+                color = '#ef4444';
+                text = 'Lemah - Gunakan minimal 6 karakter';
+            } else if (strength <= 4) {
+                strength = 50;
+                color = '#f59e0b';
+                text = 'Sedang - Tambahkan angka dan huruf besar';
+            } else if (strength <= 5) {
+                strength = 75;
+                color = '#06b6d4';
+                text = 'Kuat - Kombinasi yang baik';
+            } else {
+                strength = 100;
+                color = '#10b981';
+                text = 'Sangat Kuat - Password aman';
+            }
+
+            strengthFill.style.width = `${strength}%`;
+            strengthFill.style.backgroundColor = color;
+            strengthText.textContent = text;
+            strengthText.style.color = color;
+        }
+
+        passwordInput.addEventListener('input', checkPasswordStrength);
+
+        // Real-time validation
+        namaInput.addEventListener('input', () => {
+            if (namaInput.value.trim().length < 3) {
+                namaError.textContent = 'Nama minimal 3 karakter';
+                namaError.style.display = 'block';
+            } else {
+                namaError.style.display = 'none';
+            }
+        });
+
+        emailInput.addEventListener('input', () => {
+            const email = emailInput.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                emailError.textContent = 'Format email tidak valid';
+                emailError.style.display = 'block';
+            } else {
+                emailError.style.display = 'none';
+            }
+        });
+
+        hpInput.addEventListener('input', () => {
+            const hp = hpInput.value;
+            const hpRegex = /^08[0-9]{8,11}$/;
+            if (!hpRegex.test(hp)) {
+                hpError.textContent = 'Nomor HP harus dimulai dengan 08 dan 10-13 digit';
+                hpError.style.display = 'block';
+            } else {
+                hpError.style.display = 'none';
+            }
+        });
+
+        confirmInput.addEventListener('input', () => {
+            if (passwordInput.value !== confirmInput.value) {
+                confirmError.textContent = 'Password tidak cocok';
+                confirmError.style.display = 'block';
+            } else {
+                confirmError.style.display = 'none';
+            }
+        });
+
+        // Show alert message
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById('alertMessage');
+            const alertClass = type === 'success' ? 'alert-success' : (type === 'error' ? 'alert-danger' : 'alert-info');
+            alertDiv.className = `alert ${alertClass}`;
+            alertDiv.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle')}"></i>
+                <span>${message}</span>
+            `;
+            alertDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                alertDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate all fields
+            let isValid = true;
+            
+            if (namaInput.value.trim().length < 3) {
+                namaError.textContent = 'Nama minimal 3 karakter';
+                namaError.style.display = 'block';
+                isValid = false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailInput.value)) {
+                emailError.textContent = 'Format email tidak valid';
+                emailError.style.display = 'block';
+                isValid = false;
+            }
+            
+            const hpRegex = /^08[0-9]{8,11}$/;
+            if (!hpRegex.test(hpInput.value)) {
+                hpError.textContent = 'Nomor HP harus dimulai dengan 08 dan 10-13 digit';
+                hpError.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (passwordInput.value.length < 6) {
+                passwordError.textContent = 'Password minimal 6 karakter';
+                passwordError.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (passwordInput.value !== confirmInput.value) {
+                confirmError.textContent = 'Password tidak cocok';
+                confirmError.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showAlert('error', 'Mohon lengkapi data dengan benar');
+                return;
+            }
+            
+            // Disable button
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            
+            try {
+                const result = await auth.register({
+                    nama: namaInput.value.trim(),
+                    email: emailInput.value.trim(),
+                    password: passwordInput.value,
+                    confirmPassword: confirmInput.value,
+                    no_hp: hpInput.value.trim(),
+                    alamat: alamatInput.value.trim()
+                });
+                
+                if (result.success) {
+                    showAlert('success', 'Pendaftaran berhasil! Mengalihkan ke halaman login...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showAlert('error', result.message || 'Pendaftaran gagal');
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Daftar Sekarang';
+                }
+            } catch (error) {
+                showAlert('error', error.message || 'Terjadi kesalahan. Silakan coba lagi.');
+                registerBtn.disabled = false;
+                registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> Daftar Sekarang';
+            }
+        });
+    </script>
+</body>
+</html>
