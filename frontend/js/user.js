@@ -1,493 +1,306 @@
 /**
  * USER/CUSTOMER PAGE - LaundryPro
- * Halaman untuk role customer/pelanggan
  */
 
-// ============ VARIABLES ============
 let currentUser = null;
 let myOrders = [];
-let myProfile = null;
 
-// ============ INITIALIZATION ============
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check authentication
-    currentUser = auth.getUser();
+    // Ambil user dari auth
+    currentUser = auth.getCurrentUser();
     
     if (!currentUser) {
         window.location.href = '/login.html';
         return;
     }
     
-    // Check role
     if (currentUser.role !== 'customer') {
         alert('Halaman ini khusus untuk pelanggan');
-        window.location.href = auth.getRedirectUrl(currentUser.role);
+        window.location.href = '/login.html';
         return;
     }
     
-    // Setup page
-    setupUserInterface();
-    await loadUserData();
-    
-    // Setup event listeners
-    setupEventListeners();
-});
-
-// ============ SETUP ============
-function setupUserInterface() {
-    // Set user name
+    // Tampilkan info user
     document.getElementById('userName').innerText = currentUser.nama;
     document.getElementById('userAvatar').innerText = currentUser.nama.charAt(0).toUpperCase();
+    document.getElementById('pageTitle').innerText = 'Dashboard Saya';
     
-    // Set page title
-    document.getElementById('pageTitle').innerText = 'Dashboard Pelanggan';
-}
-
-function setupEventListeners() {
-    // Menu navigation
+    // Load data
+    await loadOrders();
+    await renderDashboard();
+    
+    // Event listeners menu
     document.querySelectorAll('.menu-item[data-page]').forEach(item => {
         item.addEventListener('click', () => {
             const page = item.getAttribute('data-page');
-            changePage(page);
+            navigateTo(page);
         });
     });
     
     // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    document.getElementById('logoutBtn').addEventListener('click', () => {
         auth.logout();
     });
+});
+
+async function loadOrders() {
+    try {
+        myOrders = await LaundryAPI.getPesanan({ customerId: currentUser.id });
+        console.log('Orders loaded:', myOrders);
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        myOrders = [];
+    }
 }
 
-// ============ PAGE NAVIGATION ============
-async function changePage(page) {
+async function navigateTo(page) {
     // Update active menu
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-page') === page) {
-            item.classList.add('active');
-        }
-    });
+    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+    document.querySelector(`[data-page="${page}"]`).classList.add('active');
     
-    // Update title
     const titles = {
         dashboard: 'Dashboard Saya',
         pesanan: 'Pesanan Saya',
+        tracking: 'Tracking Pesanan',
         profile: 'Profil Saya'
     };
     document.getElementById('pageTitle').innerText = titles[page] || page;
     
-    // Load page content
-    if (page === 'dashboard') await loadDashboard();
-    else if (page === 'pesanan') await loadMyOrders();
-    else if (page === 'profile') await loadProfile();
+    // Render page
+    if (page === 'dashboard') await renderDashboard();
+    else if (page === 'pesanan') await renderPesanan();
+    else if (page === 'tracking') await renderTracking();
+    else if (page === 'profile') await renderProfile();
 }
 
-// ============ LOAD DATA ============
-async function loadUserData() {
-    try {
-        myProfile = currentUser;
-        myOrders = await LaundryAPI.getPesanan({ customerId: currentUser.id });
-    } catch (error) {
-        console.error('Gagal load data:', error);
-        showMessage('error', 'Gagal memuat data');
-    }
-}
-
-async function loadDashboard() {
-    if (!myOrders) await loadUserData();
-    
+async function renderDashboard() {
     const stats = {
         total: myOrders.length,
         menunggu: myOrders.filter(o => o.status === 'menunggu').length,
         proses: myOrders.filter(o => o.status === 'proses').length,
-        selesai: myOrders.filter(o => o.status === 'selesai').length,
-        diambil: myOrders.filter(o => o.status === 'diambil').length,
-        totalBelanja: myOrders.reduce((sum, o) => sum + (o.totalBayar || 0), 0)
+        selesai: myOrders.filter(o => o.status === 'selesai').length
     };
-    
     const latestOrders = myOrders.slice(0, 5);
     
     const html = `
-        <!-- PROFILE CARD -->
-        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #4361ee, #3730a3); color: white;">
-            <div class="card-body" style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
-                <div class="avatar avatar-lg" style="background: rgba(255,255,255,0.2); font-size: 2rem;">
-                    ${currentUser.nama.charAt(0).toUpperCase()}
-                </div>
+        <div style="background: linear-gradient(135deg, #4361ee, #3730a3); border-radius: 12px; padding: 20px; color: white; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h2 style="margin: 0 0 0.5rem 0;">${currentUser.nama}</h2>
-                    <p style="margin: 0; opacity: 0.9;">
-                        <i class="fas fa-envelope"></i> ${currentUser.email}
-                    </p>
-                    <p style="margin: 0.25rem 0 0 0; opacity: 0.9;">
-                        <i class="fas fa-phone"></i> ${currentUser.no_hp || 'Belum diisi'}
-                    </p>
+                    <h2 style="margin: 0;">Halo, ${currentUser.nama}!</h2>
+                    <p style="margin: 8px 0 0;">${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
+                <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">${currentUser.nama.charAt(0).toUpperCase()}</div>
             </div>
         </div>
         
-        <!-- STATS GRID -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between;">
+                <div><i class="fas fa-map-marker-alt" style="color: #10b981;"></i> <strong>Alamat Antar Jemput</strong></div>
+                <button onclick="window.openEditAlamat()" style="background: none; border: none; color: #4361ee; cursor: pointer;"><i class="fas fa-edit"></i> Edit</button>
+            </div>
+            <p style="margin-top: 8px;">${currentUser.alamat || '<span style="color: gray;">Belum diisi</span>'}</p>
+        </div>
+        
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #4361ee20; color: #4361ee;">
-                    <i class="fas fa-shopping-bag"></i>
-                </div>
-                <div class="stat-value">${stats.total}</div>
-                <div class="stat-label">Total Pesanan</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #f59e0b20; color: #f59e0b;">
-                    <i class="fas fa-spinner"></i>
-                </div>
-                <div class="stat-value">${stats.proses}</div>
-                <div class="stat-label">Sedang Diproses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #10b98120; color: #10b981;">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-value">${stats.selesai}</div>
-                <div class="stat-label">Selesai</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: #8b5cf620; color: #8b5cf6;">
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-                <div class="stat-value">${formatRupiah(stats.totalBelanja)}</div>
-                <div class="stat-label">Total Belanja</div>
-            </div>
+            <div class="stat-card"><div class="stat-value">${stats.total}</div><div class="stat-label">Total Pesanan</div></div>
+            <div class="stat-card"><div class="stat-value">${stats.menunggu}</div><div class="stat-label">Menunggu</div></div>
+            <div class="stat-card"><div class="stat-value">${stats.selesai}</div><div class="stat-label">Selesai</div></div>
         </div>
         
-        <!-- QUICK ACTION -->
-        <div class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-header">
-                <h3><i class="fas fa-bolt"></i> Aksi Cepat</h3>
-            </div>
-            <div class="card-body">
-                <button class="btn btn-primary" onclick="window.location.href='/pages/pesanan-baru.html'">
-                    <i class="fas fa-plus"></i> Pesanan Baru
-                </button>
-                <button class="btn btn-outline" onclick="changePage('pesanan')" style="margin-left: 0.5rem;">
-                    <i class="fas fa-list"></i> Lihat Pesanan
-                </button>
-            </div>
-        </div>
-        
-        <!-- RECENT ORDERS -->
         <div class="card">
             <div class="card-header">
-                <h3><i class="fas fa-clock"></i> Pesanan Terbaru</h3>
-                <button class="btn btn-sm btn-outline" onclick="changePage('pesanan')">
-                    Lihat Semua <i class="fas fa-arrow-right"></i>
-                </button>
+                <span><i class="fas fa-clock"></i> Pesanan Terbaru</span>
+                <button class="btn btn-sm btn-outline" onclick="window.navigateTo('pesanan')">Lihat Semua <i class="fas fa-arrow-right"></i></button>
             </div>
-            <div class="table-wrapper">
+            <div class="card-body" style="padding: 0;">
                 <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Kode Pesanan</th>
-                            <th>Layanan</th>
-                            <th>Berat</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Tanggal</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Kode</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
                     <tbody>
                         ${latestOrders.map(o => `
-                            <tr onclick="lihatDetailPesanan(${o.id})" style="cursor: pointer;">
+                            <tr>
+                                <td><strong>${o.kode}</strong></td>
+                                <td>${o.layananNama}</td>
+                                <td>${o.berat} kg</td>
+                                <td>${formatRupiah(o.totalBayar)}</td>
+                                <td>${getStatusBadge(o.status)}</td>
+                                <td><button class="btn btn-sm btn-primary" onclick="window.trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button></td>
+                            </tr>
+                        `).join('')}
+                        ${latestOrders.length === 0 ? '<tr><td colspan="6" style="text-align:center;">Belum ada pesanan</td>' : ''}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    document.getElementById('pageContent').innerHTML = html;
+}
+
+async function renderPesanan() {
+    const html = `
+        <div class="card">
+            <div class="card-header"><span><i class="fas fa-shopping-bag"></i> Semua Pesanan</span></div>
+            <div class="card-body" style="padding: 0;">
+                <table class="table">
+                    <thead><tr><th>Kode</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        ${myOrders.map(o => `
+                            <tr>
                                 <td><strong>${o.kode}</strong></td>
                                 <td>${o.layananNama}</td>
                                 <td>${o.berat} kg</td>
                                 <td>${formatRupiah(o.totalBayar)}</td>
                                 <td>${getStatusBadge(o.status)}</td>
                                 <td>${o.tanggalMasuk}</td>
+                                <td><button class="btn btn-sm btn-primary" onclick="window.trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button></td>
                             </tr>
                         `).join('')}
-                        ${latestOrders.length === 0 ? '<tr><td colspan="6" class="text-center">Belum ada pesanan</td></tr>' : ''}
+                        ${myOrders.length === 0 ? '<tr><td colspan="7" style="text-align:center;">Belum ada pesanan</td>' : ''}
                     </tbody>
                 </table>
             </div>
         </div>
     `;
-    
     document.getElementById('pageContent').innerHTML = html;
 }
 
-async function loadMyOrders() {
-    if (!myOrders) await loadUserData();
+async function renderTracking() {
+    const active = myOrders.filter(o => o.status !== 'diambil');
+    const history = myOrders.filter(o => o.status === 'diambil');
     
-    const html = `
-        <div style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-            <div style="flex: 1; max-width: 300px;">
-                <input type="text" id="searchOrder" class="form-control" placeholder="🔍 Cari pesanan..." onkeyup="filterMyOrders()">
-            </div>
-            <select id="statusFilter" class="form-control" style="width: 150px;" onchange="filterMyOrders()">
-                <option value="">Semua Status</option>
-                <option value="menunggu">Menunggu</option>
-                <option value="proses">Proses</option>
-                <option value="selesai">Selesai</option>
-                <option value="diambil">Diambil</option>
-            </select>
-        </div>
-        
-        <div class="table-wrapper">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Kode Pesanan</th>
-                        <th>Layanan</th>
-                        <th>Berat</th>
-                        <th>Harga/kg</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Pembayaran</th>
-                        <th>Tanggal</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="ordersTableBody">
-                    ${myOrders.map(o => renderOrderRow(o)).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-    
-    document.getElementById('pageContent').innerHTML = html;
-}
-
-function renderOrderRow(order) {
-    return `
-        <tr>
-            <td><strong>${order.kode}</strong></td>
-            <td>${order.layananNama}</td>
-            <td>${order.berat} kg</td>
-            <td>${formatRupiah(order.hargaPerKg)}</td>
-            <td>${formatRupiah(order.totalBayar)}</td>
-            <td>${getStatusBadge(order.status)}</td>
-            <td>${getPaymentBadge(order.statusPembayaran)}</td>
-            <td>${order.tanggalMasuk}</td>
-            <td>
-                <button class="btn btn-sm btn-outline" onclick="lihatDetailPesanan(${order.id})">
-                    <i class="fas fa-eye"></i> Detail
-                </button>
-                ${order.status === 'menunggu' ? `
-                    <button class="btn btn-sm btn-danger" onclick="cancelOrder(${order.id})">
-                        <i class="fas fa-times"></i> Batal
-                    </button>
-                ` : ''}
-            </td>
-        </tr>
-    `;
-}
-
-function filterMyOrders() {
-    const search = document.getElementById('searchOrder')?.value.toLowerCase() || '';
-    const status = document.getElementById('statusFilter')?.value || '';
-    
-    const filtered = myOrders.filter(o => {
-        const matchSearch = o.kode.toLowerCase().includes(search);
-        const matchStatus = !status || o.status === status;
-        return matchSearch && matchStatus;
-    });
-    
-    const tbody = document.getElementById('ordersTableBody');
-    if (tbody) {
-        tbody.innerHTML = filtered.map(o => renderOrderRow(o)).join('');
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada pesanan</td></tr>';
-        }
-    }
-}
-
-async function loadProfile() {
     const html = `
         <div class="card">
-            <div class="card-header">
-                <h3><i class="fas fa-user-circle"></i> Profil Saya</h3>
-            </div>
+            <div class="card-header"><span><i class="fas fa-spinner fa-spin"></i> Pesanan Aktif</span></div>
             <div class="card-body">
-                <form id="profileForm">
-                    <div class="form-group">
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" id="nama" class="form-control" value="${currentUser.nama}" required>
+                ${active.map(o => `
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer;" onclick="window.trackOrder(${o.id})">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div><strong>${o.kode}</strong><br><small>${o.layananNama} - ${o.berat} kg</small></div>
+                            ${getStatusBadge(o.status)}
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="email" class="form-control" value="${currentUser.email}" readonly>
-                        <small class="text-muted">Email tidak dapat diubah</small>
+                `).join('')}
+                ${active.length === 0 ? '<p style="text-align:center; color:gray;">Tidak ada pesanan aktif</p>' : ''}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span><i class="fas fa-history"></i> Riwayat Pesanan</span></div>
+            <div class="card-body">
+                ${history.map(o => `
+                    <div style="background: #f8fafc; border-radius: 8px; padding: 12px; margin-bottom: 10px; opacity: 0.7;">
+                        <div><strong>${o.kode}</strong><br><small>${o.layananNama} - ${o.berat} kg</small></div>
+                        <div>${getStatusBadge(o.status)}</div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Nomor HP</label>
-                        <input type="tel" id="no_hp" class="form-control" value="${currentUser.no_hp || ''}" placeholder="08xxxxxxxxxx">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Alamat</label>
-                        <textarea id="alamat" class="form-control" rows="3" placeholder="Jl. Contoh No. 123">${currentUser.alamat || ''}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
-                        <input type="password" id="new_password" class="form-control" placeholder="Password baru">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Konfirmasi Password Baru</label>
-                        <input type="password" id="confirm_password" class="form-control" placeholder="Konfirmasi password">
-                    </div>
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Simpan Perubahan
-                        </button>
-                        <button type="button" class="btn btn-danger" onclick="confirmDeleteAccount()">
-                            <i class="fas fa-trash"></i> Hapus Akun
-                        </button>
-                    </div>
-                </form>
+                `).join('')}
+                ${history.length === 0 ? '<p style="text-align:center; color:gray;">Belum ada riwayat</p>' : ''}
             </div>
         </div>
     `;
-    
     document.getElementById('pageContent').innerHTML = html;
-    
-    // Setup form submit
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await updateProfile();
-    });
 }
 
-async function updateProfile() {
-    const newPassword = document.getElementById('new_password')?.value;
-    const confirmPassword = document.getElementById('confirm_password')?.value;
-    
-    if (newPassword && newPassword !== confirmPassword) {
-        showMessage('error', 'Konfirmasi password tidak cocok');
-        return;
-    }
-    
-    const updatedData = {
-        nama: document.getElementById('nama').value,
-        no_hp: document.getElementById('no_hp').value,
-        alamat: document.getElementById('alamat').value
-    };
-    
-    if (newPassword) {
-        updatedData.password = newPassword;
-    }
-    
-    try {
-        // Update profile via API
-        await LaundryAPI.updateUser(currentUser.id, updatedData);
-        
-        // Update local user
-        currentUser = { ...currentUser, ...updatedData };
-        localStorage.setItem('laundry_current_user', JSON.stringify(currentUser));
-        
-        showMessage('success', 'Profil berhasil diperbarui');
-        
-        // Reload page after 1 second
-        setTimeout(() => location.reload(), 1000);
-    } catch (error) {
-        showMessage('error', error.message);
-    }
+async function renderProfile() {
+    const html = `
+        <div class="card">
+            <div class="card-header"><span><i class="fas fa-user-circle"></i> Profil Saya</span></div>
+            <div class="card-body">
+                <div style="margin-bottom: 15px;"><strong>Nama</strong><br>${currentUser.nama}</div>
+                <div style="margin-bottom: 15px;"><strong>Email</strong><br>${currentUser.email}</div>
+                <div style="margin-bottom: 15px;"><strong>No HP</strong><br>${currentUser.no_hp || '-'}</div>
+                <div style="margin-bottom: 15px;"><strong>Alamat</strong><br>${currentUser.alamat || '-'}</div>
+                <button class="btn btn-primary" onclick="window.openEditAlamat()"><i class="fas fa-map-marker-alt"></i> Edit Alamat</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('pageContent').innerHTML = html;
 }
 
-// ============ ORDER DETAILS ============
-async function lihatDetailPesanan(orderId) {
+function trackOrder(orderId) {
     const order = myOrders.find(o => o.id === orderId);
     if (!order) return;
     
-    const modalHtml = `
-        <div class="modal active" id="orderDetailModal">
-            <div class="modal-content" style="max-width: 600px;">
-                <div class="modal-header">
-                    <h3><i class="fas fa-receipt"></i> Detail Pesanan ${order.kode}</h3>
-                    <button class="modal-close" onclick="closeModal('orderDetailModal')">&times;</button>
+    const steps = [
+        { status: 'menunggu', title: 'Pesanan Diterima', icon: 'fa-receipt', desc: 'Pesanan Anda telah kami terima' },
+        { status: 'proses', title: 'Sedang Diproses', icon: 'fa-spinner', desc: 'Pakaian sedang dicuci' },
+        { status: 'selesai', title: 'Selesai', icon: 'fa-check-circle', desc: 'Pakaian siap diambil/diantar' }
+    ];
+    
+    let html = `<div style="padding: 10px;">`;
+    steps.forEach((step, idx) => {
+        let isActive = order.status === step.status;
+        let isCompleted = steps.findIndex(s => s.status === order.status) > idx;
+        let color = isCompleted ? '#10b981' : (isActive ? '#4361ee' : '#cbd5e1');
+        
+        html += `
+            <div style="display: flex; margin-bottom: 20px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <i class="fas ${step.icon}" style="color: white;"></i>
                 </div>
-                <div class="modal-body">
-                    <div style="display: grid; gap: 1rem;">
-                        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0;">
-                            <span style="color: #64748b;">Status Pesanan</span>
-                            <span>${getStatusBadge(order.status)}</span>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                            <div><span style="color: #64748b;">Layanan</span><br><strong>${order.layananNama}</strong></div>
-                            <div><span style="color: #64748b;">Berat</span><br><strong>${order.berat} kg</strong></div>
-                            <div><span style="color: #64748b;">Harga/kg</span><br><strong>${formatRupiah(order.hargaPerKg)}</strong></div>
-                            <div><span style="color: #64748b;">Total</span><br><strong>${formatRupiah(order.totalBayar)}</strong></div>
-                            <div><span style="color: #64748b;">Tanggal Masuk</span><br><strong>${order.tanggalMasuk}</strong></div>
-                            <div><span style="color: #64748b;">Tanggal Selesai</span><br><strong>${order.tanggalSelesai || '-'}</strong></div>
-                            <div><span style="color: #64748b;">Pembayaran</span><br>${getPaymentBadge(order.statusPembayaran)}</div>
-                            <div><span style="color: #64748b;">Diskon</span><br><strong>${order.diskon ? formatRupiah(order.diskon) : '-'}</strong></div>
-                        </div>
-                        ${order.catatan ? `
-                            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 0.5rem;">
-                                <span style="color: #64748b;">Catatan:</span>
-                                <p style="margin: 0.25rem 0 0 0;">${order.catatan}</p>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline" onclick="closeModal('orderDetailModal')">Tutup</button>
-                    ${order.status === 'menunggu' ? `
-                        <button class="btn btn-danger" onclick="cancelOrder(${order.id})">Batalkan Pesanan</button>
-                    ` : ''}
+                <div>
+                    <div style="font-weight: 600;">${step.title}</div>
+                    <div style="font-size: 12px; color: #64748b;">${step.desc}</div>
+                    ${isActive ? '<div style="font-size: 11px; color: #4361ee; margin-top: 4px;">Status saat ini</div>' : ''}
                 </div>
             </div>
-        </div>
-    `;
+        `;
+    });
+    html += `<hr><div><strong>Detail:</strong><br>Kode: ${order.kode}<br>Total: ${formatRupiah(order.totalBayar)}<br>Tanggal: ${order.tanggalMasuk}</div></div>`;
     
-    // Remove existing modal
-    const existingModal = document.getElementById('orderDetailModal');
-    if (existingModal) existingModal.remove();
-    
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.getElementById('trackingBody').innerHTML = html;
+    openModal('trackingModal');
 }
 
-// ============ CANCEL ORDER ============
-async function cancelOrder(orderId) {
-    if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return;
-    
+function openEditAlamat() {
+    document.getElementById('alamatInput').value = currentUser.alamat || '';
+    openModal('alamatModal');
+}
+
+async function simpanAlamat() {
+    const newAlamat = document.getElementById('alamatInput').value.trim();
+    if (!newAlamat) {
+        alert('Alamat tidak boleh kosong');
+        return;
+    }
     try {
-        await LaundryAPI.updatePesanan(orderId, { status: 'dibatalkan' });
-        showMessage('success', 'Pesanan telah dibatalkan');
-        await loadUserData();
-        await loadMyOrders();
-        closeModal('orderDetailModal');
+        await LaundryAPI.updateUser(currentUser.id, { alamat: newAlamat });
+        currentUser.alamat = newAlamat;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        closeModal('alamatModal');
+        alert('Alamat berhasil diperbarui');
+        await loadOrders();
+        await renderDashboard();
     } catch (error) {
-        showMessage('error', error.message);
+        alert('Error: ' + error.message);
     }
 }
 
-// ============ DELETE ACCOUNT ============
-function confirmDeleteAccount() {
-    if (confirm('⚠️ PERINGATAN: Menghapus akun akan menghapus semua data pesanan Anda. Apakah Anda yakin?')) {
-        if (confirm('Konfirmasi lagi: Ketik "HAPUS" untuk melanjutkan')) {
-            deleteAccount();
-        }
-    }
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
 }
 
-async function deleteAccount() {
-    try {
-        await LaundryAPI.deleteUser(currentUser.id);
-        showMessage('success', 'Akun berhasil dihapus');
-        auth.logout();
-    } catch (error) {
-        showMessage('error', error.message);
-    }
-}
-
-// ============ HELPER FUNCTIONS ============
 function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.remove();
+    document.getElementById(modalId).classList.remove('active');
 }
 
-// Export to global
-window.changePage = changePage;
-window.filterMyOrders = filterMyOrders;
-window.lihatDetailPesanan = lihatDetailPesanan;
-window.cancelOrder = cancelOrder;
+function formatRupiah(angka) {
+    return 'Rp ' + (angka || 0).toLocaleString('id-ID');
+}
+
+function getStatusBadge(status) {
+    const map = {
+        'menunggu': '<span class="badge badge-warning">⏳ Menunggu</span>',
+        'proses': '<span class="badge badge-info">🔄 Diproses</span>',
+        'selesai': '<span class="badge badge-success">✅ Selesai</span>',
+        'diambil': '<span class="badge badge-success">📦 Diambil</span>'
+    };
+    return map[status] || `<span class="badge">${status}</span>`;
+}
+
+// Export ke window
+window.navigateTo = navigateTo;
+window.trackOrder = trackOrder;
+window.openEditAlamat = openEditAlamat;
+window.simpanAlamat = simpanAlamat;
+window.openModal = openModal;
 window.closeModal = closeModal;
-window.confirmDeleteAccount = confirmDeleteAccount;
+window.formatRupiah = formatRupiah;
+window.getStatusBadge = getStatusBadge;

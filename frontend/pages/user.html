@@ -3,303 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Laundry - Laundry int </title>
+    <title>Customer Dashboard - LaundryPro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/components.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        /* Customer-specific styles */
-        .welcome-banner {
-            background: linear-gradient(135deg, #4361ee, #3730a3);
-            border-radius: 1rem;
-            padding: 1.5rem;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e1a;
             color: white;
-            margin-bottom: 1.5rem;
+            overflow-x: hidden;
         }
-        
-        .poin-card {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            border-radius: 1rem;
-            padding: 1rem;
-            color: white;
-            text-align: center;
+
+        /* Animated Gradient Background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 20% 30%, #0f172a, #020617, #000000);
         }
-        
-        .poin-value {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        
-        .order-timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-        
-        .timeline-item {
-            position: relative;
-            padding-bottom: 1.5rem;
-            border-left: 2px solid #e2e8f0;
-            padding-left: 1.5rem;
-        }
-        
-        .timeline-item:last-child {
-            border-left: none;
-        }
-        
-        .timeline-item::before {
+        .bg-gradient::before {
             content: '';
             position: absolute;
-            left: -0.5rem;
             top: 0;
-            width: 1rem;
-            height: 1rem;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(59,130,246,0.03) 0px, rgba(59,130,246,0.03) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #3b82f6;
             border-radius: 50%;
-            background: white;
-            border: 2px solid #4361ee;
+            opacity: 0.5;
+            animation: floatParticle 15s infinite linear;
         }
-        
-        .timeline-item.completed::before {
-            background: #10b981;
-            border-color: #10b981;
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
-        
-        .timeline-item.current::before {
-            background: #4361ee;
-            border-color: #4361ee;
-            animation: pulse 1.5s infinite;
+
+        /* Sidebar Glass */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(59, 130, 246, 0.3);
+            z-index: 100;
+            transition: all 0.4s;
+            overflow-y: auto;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
+        .logo {
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            text-align: center;
         }
-        
-        .timeline-date {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: 0.25rem;
-        }
-        
-        .timeline-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .order-card-customer {
-            background: white;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .order-card-customer:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
-        
-        .profile-section {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-        
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #4361ee, #06b6d4);
-            border-radius: 50%;
+        .logo-icon {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            font-weight: 700;
-            color: white;
+            margin: 0 auto 10px;
+            font-size: 24px;
+            box-shadow: 0 0 20px rgba(59,130,246,0.5);
         }
-        
-        .quick-action-buttons {
+        .logo h2 { font-size: 1.3rem; font-weight: 700; color: white; }
+        .logo p { font-size: 0.7rem; color: #94a3b8; letter-spacing: 1px; }
+
+        .menu-item {
+            padding: 14px 24px;
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        
-        .quick-action-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 1rem;
-            text-align: center;
-            background: white;
-            border-radius: 1rem;
+            align-items: center;
+            gap: 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            color: #cbd5e1;
+            margin: 5px 12px;
+            border-radius: 12px;
         }
-        
-        .quick-action-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        .menu-item:hover { background: rgba(59, 130, 246, 0.2); color: white; transform: translateX(5px); }
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(6,182,212,0.2));
+            color: white;
+            border-left: 3px solid #3b82f6;
         }
-        
-        .quick-action-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
+        .menu-item i { width: 24px; font-size: 18px; }
+        .logout-btn { margin-top: 40px; color: #f43f5e; }
+        .logout-btn:hover { background: rgba(244,63,94,0.2); color: #f43f5e; }
+
+        /* Main Content */
+        .main-content { margin-left: 280px; padding: 25px 35px; min-height: 100vh; }
+
+        /* Top Bar */
+        .top-bar {
+            background: rgba(10, 14, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 18px 28px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(59, 130, 246, 0.3);
         }
-        
-        @media (max-width: 768px) {
-            .profile-section {
-                flex-direction: column;
-                text-align: center;
-            }
+        /* JAM BESAR */
+        .datetime {
+            background: rgba(59, 130, 246, 0.15);
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            text-align: center;
         }
+        .time {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #60a5fa;
+            font-family: monospace;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(59,130,246,0.8);
+        }
+        .date { font-size: 0.7rem; color: #94a3b8; margin-top: 2px; }
+
+        .page-title { font-size: 1.3rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 15px; background: rgba(59,130,246,0.1); padding: 8px 20px; border-radius: 50px; }
+        .user-name { color: white; font-weight: 500; }
+        .user-avatar { width: 42px; height: 42px; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 15px rgba(59,130,246,0.4); }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 30px; }
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 22px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.4s;
+        }
+        .stat-card:hover { transform: translateY(-8px); border-color: rgba(59,130,246,0.5); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .stat-icon { width: 50px; height: 50px; background: rgba(59,130,246,0.2); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .stat-icon i { font-size: 24px; color: #60a5fa; }
+        .stat-value { font-size: 32px; font-weight: 800; color: white; }
+        .stat-label { color: #94a3b8; font-size: 13px; margin-top: 8px; }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        .card-header { padding: 20px 25px; border-bottom: 1px solid rgba(59,130,246,0.2); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: white; }
+        .card-body { padding: 20px 25px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 12px; color: #60a5fa; font-weight: 500; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(59,130,246,0.2); }
+        td { padding: 15px 12px; color: #cbd5e1; border-bottom: 1px solid rgba(59,130,246,0.1); }
+        tr:hover td { background: rgba(59,130,246,0.05); }
+
+        /* Badge */
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .badge-info { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .badge-success { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+
+        /* Buttons */
+        .btn { padding: 10px 22px; border-radius: 12px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #06b6d4); color: white; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(59,130,246,0.5); }
+        .btn-outline { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-sm { padding: 5px 12px; font-size: 11px; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 1000; }
+        .modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        .modal-content { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border-radius: 24px; width: 90%; max-width: 500px; border: 1px solid rgba(59,130,246,0.3); }
+        .modal-header { padding: 20px 25px; border-bottom: 1px solid rgba(59,130,246,0.2); display: flex; justify-content: space-between; align-items: center; color: white; }
+        .modal-body { padding: 25px; }
+        .modal-footer { padding: 20px 25px; border-top: 1px solid rgba(59,130,246,0.2); display: flex; justify-content: flex-end; gap: 12px; }
+        .form-control { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; color: white; font-size: 14px; }
+        .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+        .form-label { display: block; margin-bottom: 8px; color: #60a5fa; font-size: 13px; font-weight: 500; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; } .stats-grid { grid-template-columns: 1fr; } .time { font-size: 1rem; } }
     </style>
 </head>
 <body>
+    <div class="bg-gradient"></div>
+    <div class="particles" id="particles"></div>
+
     <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <i class="fas fa-tshirt"></i>
-                <h2>Laundry int </h2>
-            </div>
-            <p style="font-size: 0.75rem; margin-top: 0.5rem;">Customer Panel</p>
-        </div>
-        <div class="sidebar-menu">
-            <div class="menu-item active" data-page="dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-            </div>
-            <div class="menu-item" data-page="pesanan">
-                <i class="fas fa-shopping-bag"></i>
-                <span>Pesanan Saya</span>
-            </div>
-            <div class="menu-item" data-page="tracking">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Tracking Pesanan</span>
-            </div>
-            <div class="menu-item" data-page="profile">
-                <i class="fas fa-user"></i>
-                <span>Profil Saya</span>
-            </div>
-            <div class="menu-item" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </div>
-        </div>
+        <div class="logo"><div class="logo-icon"><i class="fas fa-tshirt"></i></div><h2>LaundryPro</h2><p>Customer Panel • Premium</p></div>
+        <div class="menu-item active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</div>
+        <div class="menu-item" data-page="pesanan"><i class="fas fa-shopping-bag"></i> Pesanan Saya</div>
+        <div class="menu-item" data-page="tracking"><i class="fas fa-map-marker-alt"></i> Tracking</div>
+        <div class="menu-item" data-page="profile"><i class="fas fa-user"></i> Profil Saya</div>
+        <div class="menu-item logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
     </div>
-    
+
     <div class="main-content">
         <div class="top-bar">
-            <h3 id="pageTitle">Dashboard Saya</h3>
-            <div class="user-info">
-                <span id="userName">Pelanggan</span>
-                <div class="user-avatar" id="userAvatar">P</div>
-            </div>
+            <div class="datetime"><div class="time" id="currentTime">--:--:--</div><div class="date" id="currentDate">--, -- -- ----</div></div>
+            <div class="page-title"><i class="fas fa-chart-line"></i> <span id="pageTitle">Dashboard Saya</span></div>
+            <div class="user-info"><span class="user-name" id="userName">Pelanggan</span><div class="user-avatar" id="userAvatar">P</div></div>
         </div>
-        
-        <div id="pageContent"></div>
+        <div id="pageContent"><div style="text-align:center; padding:50px; color:#94a3b8;">Loading...</div></div>
     </div>
-    
-    <!-- Modal Pesanan Baru (Customer) -->
-    <div class="modal" id="pesananBaruModal">
-        <div class="modal-content" style="max-width: 550px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-plus"></i> Buat Pesanan Baru</h3>
-                <button class="modal-close" onclick="closeModal('pesananBaruModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="formPesananBaru">
-                    <div class="form-group">
-                        <label class="form-label required">Layanan</label>
-                        <select id="layananId" class="form-control" required onchange="hitungTotalCustomer()">
-                            <option value="">-- Pilih Layanan --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label required">Berat (kg)</label>
-                        <input type="number" id="berat" class="form-control" step="0.5" min="0.5" value="1" oninput="hitungTotalCustomer()" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Catatan</label>
-                        <textarea id="catatan" class="form-control" rows="2" placeholder="Catatan khusus..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Total Harga</label>
-                        <input type="text" id="totalHarga" class="form-control" readonly style="font-weight: bold; font-size: 1.1rem; background: #f0fdf4; color: #166534;">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('pesananBaruModal')">Batal</button>
-                <button class="btn btn-primary" onclick="simpanPesananCustomer()">Buat Pesanan</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Detail Pesanan Customer -->
-    <div class="modal" id="detailPesananCustomerModal">
-        <div class="modal-content" style="max-width: 650px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-receipt"></i> Detail Pesanan</h3>
-                <button class="modal-close" onclick="closeModal('detailPesananCustomerModal')">&times;</button>
-            </div>
-            <div class="modal-body" id="detailPesananCustomerBody"></div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('detailPesananCustomerModal')">Tutup</button>
-                <button class="btn btn-danger" id="cancelOrderBtn" style="display: none;" onclick="cancelOrder()">Batalkan Pesanan</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Edit Profil -->
-    <div class="modal" id="editProfilModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> Edit Profil</h3>
-                <button class="modal-close" onclick="closeModal('editProfilModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="formEditProfil">
-                    <div class="form-group">
-                        <label class="form-label required">Nama Lengkap</label>
-                        <input type="text" id="editNama" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label required">Nomor HP</label>
-                        <input type="tel" id="editHp" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" id="editEmail" class="form-control" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Alamat</label>
-                        <textarea id="editAlamat" class="form-control" rows="2"></textarea>
-                    </div>
-                    <hr class="divider">
-                    <h4>Ganti Password</h4>
-                    <div class="form-group">
-                        <label class="form-label">Password Baru</label>
-                        <input type="password" id="newPassword" class="form-control" placeholder="Kosongkan jika tidak ingin mengubah">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Konfirmasi Password Baru</label>
-                        <input type="password" id="confirmPassword" class="form-control" placeholder="Konfirmasi password baru">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('editProfilModal')">Batal</button>
-                <button class="btn btn-primary" onclick="simpanEditProfil()">Simpan Perubahan</button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../js/utils.js"></script>
-    <script src="../js/api.js"></script>
+
     <script src="../js/auth.js"></script>
-    <script src="../js/user.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        let currentUser = null;
+        let myOrders = [];
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
+            document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 120; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = Math.random() * 10 + 10 + 's';
+                container.appendChild(p);
+            }
+        }
+        createParticles();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            currentUser = auth.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'customer') { window.location.href = '/login.html'; return; }
+            document.getElementById('userName').innerText = currentUser.nama;
+            document.getElementById('userAvatar').innerText = currentUser.nama.charAt(0).toUpperCase();
+            await loadOrders();
+            await renderDashboard();
+            document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+                item.addEventListener('click', () => navigateTo(item.getAttribute('data-page')));
+            });
+            document.getElementById('logoutBtn').addEventListener('click', () => auth.logout());
+        });
+
+        async function loadOrders() {
+            try { myOrders = await LaundryAPI.getPesanan({ customerId: currentUser.id }); }
+            catch(e) { myOrders = []; }
+        }
+
+        async function navigateTo(page) {
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            document.getElementById('pageTitle').innerHTML = `<i class="fas ${page === 'dashboard' ? 'fa-chart-line' : page === 'pesanan' ? 'fa-shopping-bag' : page === 'tracking' ? 'fa-map-marker-alt' : 'fa-user'}"></i> ${page === 'dashboard' ? 'Dashboard Saya' : page === 'pesanan' ? 'Pesanan Saya' : page === 'tracking' ? 'Tracking Pesanan' : 'Profil Saya'}`;
+            if (page === 'dashboard') await renderDashboard();
+            else if (page === 'pesanan') await renderPesanan();
+            else if (page === 'tracking') await renderTracking();
+            else if (page === 'profile') await renderProfile();
+        }
+
+        async function renderDashboard() {
+            const stats = { total: myOrders.length, menunggu: myOrders.filter(o=>o.status==='menunggu').length, proses: myOrders.filter(o=>o.status==='proses').length, selesai: myOrders.filter(o=>o.status==='selesai').length };
+            const html = `
+                <div style="background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(6,182,212,0.2)); border-radius: 20px; padding: 25px; margin-bottom: 25px;">
+                    <div><h1 style="font-size: 28px;">Halo, ${currentUser.nama}! 👋</h1><p style="color:#94a3b8;">Selamat datang di LaundryPro</p></div>
+                </div>
+                <div style="background: rgba(15,23,42,0.6); border-radius: 20px; padding: 20px; margin-bottom: 25px; border:1px solid rgba(59,130,246,0.2);">
+                    <div style="display:flex; justify-content:space-between;"><span><i class="fas fa-map-marker-alt"></i> Alamat Antar Jemput</span><button onclick="alert('Edit alamat')" style="background:none; border:none; color:#60a5fa;">Edit</button></div>
+                    <p>${currentUser.alamat || 'Belum diisi'}</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${stats.total}</div><div class="stat-label">Total Pesanan</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.menunggu}</div><div class="stat-label">Menunggu</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.selesai}</div><div class="stat-label">Selesai</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.proses}</div><div class="stat-label">Diproses</div></div>
+                </div>
+                <div class="glass-card"><div class="card-header"><span>Pesanan Terbaru</span><button class="btn btn-sm btn-outline" onclick="navigateTo('pesanan')">Lihat Semua</button></div>
+                <div class="card-body" style="padding:0;"><table><thead><tr><th>Kode</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+                ${myOrders.slice(0,5).map(o => `<tr><td><strong>${o.kode}</strong></td><td>${o.layananNama}</td><td>${o.berat} kg</td><td>Rp ${(o.totalBayar||0).toLocaleString()}</td><td><span class="badge badge-info">${o.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="alert('Tracking')">Tracking</button></td>`).join('')}
+                ${myOrders.length===0?'<tr><td colspan="6">Belum ada pesanan</td></tr>':''}</tbody></table></div></div>`;
+            document.getElementById('pageContent').innerHTML = html;
+        }
+
+        async function renderPesanan() {
+            const html = `<div class="glass-card"><div class="card-header"><span>Semua Pesanan</span></div><div class="card-body" style="padding:0;"><table><thead><tr><th>Kode</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody>
+            ${myOrders.map(o => `<tr><td><strong>${o.kode}</strong></td><td>${o.layananNama}</td><td>${o.berat} kg</td><td>Rp ${(o.totalBayar||0).toLocaleString()}</td><td><span class="badge badge-info">${o.status}</span></td><td>${o.tanggalMasuk}</td><td><button class="btn btn-sm btn-primary" onclick="alert('Tracking')">Tracking</button></td>`).join('')}
+            ${myOrders.length===0?'<tr><td colspan="7">Belum ada pesanan</td></tr>':''}</tbody></table></div></div>`;
+            document.getElementById('pageContent').innerHTML = html;
+        }
+
+        async function renderTracking() {
+            const html = `<div class="glass-card"><div class="card-header"><span>Tracking Pesanan</span></div><div class="card-body"><p>Fitur tracking akan segera hadir</p></div></div>`;
+            document.getElementById('pageContent').innerHTML = html;
+        }
+
+        async function renderProfile() {
+            const html = `<div class="glass-card"><div class="card-header"><span>Profil Saya</span></div><div class="card-body">
+                <div style="margin-bottom:15px;"><strong>Nama</strong><br>${currentUser.nama}</div>
+                <div style="margin-bottom:15px;"><strong>Email</strong><br>${currentUser.email}</div>
+                <div style="margin-bottom:15px;"><strong>No HP</strong><br>${currentUser.no_hp || '-'}</div>
+                <div style="margin-bottom:15px;"><strong>Alamat</strong><br>${currentUser.alamat || '-'}</div>
+                <button class="btn btn-primary" onclick="alert('Fitur edit profil')">Edit Profil</button>
+            </div></div>`;
+            document.getElementById('pageContent').innerHTML = html;
+        }
+
+        window.navigateTo = navigateTo;
+    </script>
 </body>
 </html>

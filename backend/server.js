@@ -12,8 +12,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // ============ DATABASE ============
 let users = [
     { id: 1, nama: "Admin Utama", email: "admin@laundry.com", password: "admin123", role: "admin", no_hp: "081234567890", alamat: "Jl. Laundry No.1" },
-    { id: 2, nama: "Operator Laundry", email: "operator@laundry.com", password: "operator123", role: "operator", no_hp: "081234567891", alamat: "Jl. Laundry No.2" },
-    { id: 3, nama: "Pelanggan Setia", email: "pelanggan@example.com", password: "user123", role: "customer", no_hp: "081234567892", alamat: "Jl. Contoh No.3" }
+    { id: 2, nama: "Pelanggan Setia", email: "pelanggan@example.com", password: "user123", role: "customer", no_hp: "081234567892", alamat: "Jl. Contoh No.3" }
 ];
 
 let pelanggan = [
@@ -30,19 +29,19 @@ let layanan = [
 ];
 
 let pesanan = [
-    { id: 1, kode: "LDY2025001", pelangganId: 1, pelangganNama: "Budi Santoso", pelangganHp: "081234567893", layananId: 1, layananNama: "Cuci Setrika", berat: 3.5, hargaPerKg: 7000, totalHarga: 24500, diskon: 0, totalBayar: 24500, status: "selesai", statusPembayaran: "lunas", tanggalMasuk: "2025-01-15", tanggalSelesai: "2025-01-16", catatan: "", operatorId: 2 },
-    { id: 2, kode: "LDY2025002", pelangganId: 2, pelangganNama: "Siti Aminah", pelangganHp: "081234567894", layananId: 5, layananNama: "Express 3 Jam", berat: 2, hargaPerKg: 15000, totalHarga: 30000, diskon: 3000, totalBayar: 27000, status: "proses", statusPembayaran: "belum", tanggalMasuk: "2025-01-20", tanggalSelesai: null, catatan: "Urgent", operatorId: 2 }
+    { id: 1, kode: "LDY2025001", pelangganId: 1, pelangganNama: "Budi Santoso", pelangganHp: "081234567893", layananId: 1, layananNama: "Cuci Setrika", berat: 3.5, hargaPerKg: 7000, totalHarga: 24500, diskon: 0, totalBayar: 24500, status: "selesai", statusPembayaran: "lunas", tanggalMasuk: "2025-01-15", tanggalSelesai: "2025-01-16", catatan: "", operatorId: 1 },
+    { id: 2, kode: "LDY2025002", pelangganId: 2, pelangganNama: "Siti Aminah", pelangganHp: "081234567894", layananId: 5, layananNama: "Express 3 Jam", berat: 2, hargaPerKg: 15000, totalHarga: 30000, diskon: 3000, totalBayar: 27000, status: "proses", statusPembayaran: "belum", tanggalMasuk: "2025-01-20", tanggalSelesai: null, catatan: "Urgent", operatorId: 1 }
 ];
 
 let aktivitas = [
-    { id: 1, deskripsi: "Sistem Laundry int Aktif", tipe: "info", createdAt: new Date().toISOString() }
+    { id: 1, deskripsi: "Sistem LaundryPro Aktif", tipe: "info", createdAt: new Date().toISOString() }
 ];
 
 let nextIds = {
     pelanggan: 3,
     layanan: 6,
     pesanan: 3,
-    user: 4,
+    user: 3,
     aktivitas: 2
 };
 
@@ -95,7 +94,7 @@ app.post('/api/register', (req, res) => {
         password,
         role: "customer",
         no_hp,
-        alamat
+        alamat: alamat || ''
     };
     
     users.push(newUser);
@@ -109,6 +108,20 @@ app.post('/api/register', (req, res) => {
 app.get('/api/users', (req, res) => {
     const usersWithoutPass = users.map(({ password, ...rest }) => rest);
     res.json(usersWithoutPass);
+});
+
+// UPDATE USER - Untuk edit profil pelanggan (alamat, nama, no_hp)
+app.put('/api/users/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = users.findIndex(u => u.id === id);
+    if (index !== -1) {
+        // Update user
+        users[index] = { ...users[index], ...req.body };
+        const { password, ...userWithoutPass } = users[index];
+        res.json(userWithoutPass);
+    } else {
+        res.status(404).json({ error: "User tidak ditemukan" });
+    }
 });
 
 app.delete('/api/users/:id', (req, res) => {
@@ -302,13 +315,12 @@ app.get('/api/aktivitas', (req, res) => {
 app.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
-║     🚀 Laundry int Server Berjalan! 🚀            ║
+║     🚀 LaundryPro Server Berjalan! 🚀            ║
 ╠══════════════════════════════════════════════════╣
 ║  Server: http://localhost:${PORT}                  ║
 ╠══════════════════════════════════════════════════╣
 ║  📋 AKUN DEMO:                                   ║
 ║  Admin:     admin@laundry.com / admin123         ║
-║  Operator:  operator@laundry.com / operator123   ║
 ║  Pelanggan: pelanggan@example.com / user123      ║
 ╚══════════════════════════════════════════════════╝
     `);
