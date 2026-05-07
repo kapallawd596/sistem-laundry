@@ -1,6 +1,6 @@
 /**
  * PELANGGAN DASHBOARD - LaundryPro
- * Fitur: Pesan Laundry (tanpa berat), Tracking, Struk, Pembayaran
+ * Fitur: Pesan Laundry (tanpa berat), Tracking, Struk, PEMBAYARAN LENGKAP
  */
 
 let currentUser = null;
@@ -106,10 +106,11 @@ async function renderDashboard() {
                                     <td>${o.berat ? o.berat + ' kg' : '-'}</td>
                                     <td>${o.totalBayar ? formatRupiah(o.totalBayar) : '-'}</td>
                                     <td>${getStatusBadge(o.status)}</td>
-                                    <td><button class="btn btn-sm btn-primary" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button></td>
+                                    <td><button class="btn btn-sm btn-primary" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button>
+                                        <td>
                                 </tr>
                             `).join('')}
-                            ${latestOrders.length === 0 ? '<tr><td colspan="6" class="text-center">Belum ada pesanan. Klik "Pesan Laundry"!</td></tr>' : ''}
+                            ${latestOrders.length === 0 ? '<tr><td colspan="6" class="text-center">Belum ada pesanan. Klik "Pesan Laundry"!</td>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -240,7 +241,7 @@ async function renderOrderForm() {
     });
 }
 
-// ============ DAFTAR PESANAN ============
+// ============ DAFTAR PESANAN (dengan tombol Bayar) ============
 async function renderPesanan() {
     await loadData();
     
@@ -261,13 +262,15 @@ async function renderPesanan() {
                                     <td>${getStatusBadge(o.status)}</td>
                                     <td>${getPaymentBadge(o.statusPembayaran)}</td>
                                     <td>${formatDate(o.tanggalPesan)}</td>
-                                    <td>
+                                    <td class="action-buttons">
                                         <button class="btn btn-sm btn-primary" onclick="showStruk(${o.id})"><i class="fas fa-file-invoice"></i> Struk</button>
-                                        ${o.status === 'selesai' && o.statusPembayaran === 'belum' ? `<button class="btn btn-sm btn-success" onclick="showPayment(${o.id})"><i class="fas fa-credit-card"></i> Bayar</button>` : ''}
+                                        ${o.status === 'selesai' && o.statusPembayaran === 'belum' ? 
+                                            `<button class="btn btn-sm btn-success" onclick="showPayment(${o.id})"><i class="fas fa-credit-card"></i> Bayar</button>` : ''}
+                                        <button class="btn btn-sm btn-outline" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button>
                                     </td>
-                                </tr>
+                                </table>
                             `).join('')}
-                            ${myOrders.length === 0 ? '<tr><td colspan="8" class="text-center">Belum ada pesanan. Klik "Pesan Laundry" untuk memesan!</td></tr>' : ''}
+                            ${myOrders.length === 0 ? '<tr><td colspan="8" class="text-center">Belum ada pesanan. Klik "Pesan Laundry" untuk memesan!</td>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -373,6 +376,115 @@ window.showStruk = function(orderId) {
     };
 };
 
+// ============ PEMBAYARAN LENGKAP (QRIS, E-WALLET, BANK, COD) ============
+window.showPayment = function(orderId) {
+    const order = myOrders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const modalHtml = `
+        <div class="modal active" id="paymentModal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3><i class="fas fa-credit-card"></i> Metode Pembayaran</h3>
+                    <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div style="font-size: 28px; font-weight: bold; color: #60A5FA;">${formatRupiah(order.totalBayar)}</div>
+                        <div style="color: #64748B;">Kode Pesanan: ${order.kode}</div>
+                    </div>
+                    
+                    <!-- QRIS -->
+                    <div class="payment-section" style="margin-bottom: 20px;">
+                        <div class="section-title" style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-qrcode"></i> QRIS</div>
+                        <div style="background: #1E293B; padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="background: white; display: inline-block; padding: 10px; border-radius: 12px; margin-bottom: 10px;">
+                                <i class="fas fa-qrcode" style="font-size: 100px; color: black;"></i>
+                            </div>
+                            <p style="font-size: 12px; color: #94A3B8;">Scan QRIS menggunakan OVO, Dana, GoPay, ShopeePay, LinkAja</p>
+                        </div>
+                    </div>
+                    
+                    <!-- E-WALLET -->
+                    <div class="payment-section" style="margin-bottom: 20px;">
+                        <div class="section-title" style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-mobile-alt"></i> E-Wallet</div>
+                        <div class="payment-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <div class="payment-option" onclick="processPayment(${orderId}, 'OVO')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                <i class="fab fa-ovino" style="font-size: 24px;"></i><br>OVO
+                            </div>
+                            <div class="payment-option" onclick="processPayment(${orderId}, 'GoPay')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                <i class="fas fa-wallet" style="font-size: 24px;"></i><br>GoPay
+                            </div>
+                            <div class="payment-option" onclick="processPayment(${orderId}, 'Dana')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                <i class="fas fa-money-bill" style="font-size: 24px;"></i><br>Dana
+                            </div>
+                            <div class="payment-option" onclick="processPayment(${orderId}, 'LinkAja')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                <i class="fas fa-link" style="font-size: 24px;"></i><br>LinkAja
+                            </div>
+                            <div class="payment-option" onclick="processPayment(${orderId}, 'ShopeePay')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                                <i class="fas fa-shopping-cart" style="font-size: 24px;"></i><br>ShopeePay
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TRANSFER BANK -->
+                    <div class="payment-section" style="margin-bottom: 20px;">
+                        <div class="section-title" style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-university"></i> Transfer Bank</div>
+                        <div class="bank-list">
+                            <div class="bank-item" onclick="copyBankAccount('BCA', '1234567890')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-building"></i> BCA - 1234567890 a.n LaundryPro</span>
+                                <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
+                            </div>
+                            <div class="bank-item" onclick="copyBankAccount('BNI', '1234567891')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-building"></i> BNI - 1234567891 a.n LaundryPro</span>
+                                <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
+                            </div>
+                            <div class="bank-item" onclick="copyBankAccount('BRI', '1234567892')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-building"></i> BRI - 1234567892 a.n LaundryPro</span>
+                                <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
+                            </div>
+                            <div class="bank-item" onclick="copyBankAccount('Mandiri', '1234567893')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
+                                <span><i class="fas fa-building"></i> Mandiri - 1234567893 a.n LaundryPro</span>
+                                <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- COD -->
+                    <div class="payment-section" style="margin-bottom: 20px;">
+                        <div class="section-title" style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-hand-holding-usd"></i> COD (Cash on Delivery)</div>
+                        <div class="payment-option" onclick="processPayment(${orderId}, 'COD')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; text-align: center; cursor: pointer;">
+                            Bayar di tempat saat pakaian diantar/diambil
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('paymentModal');
+    if (existingModal) existingModal.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+// Fungsi copy nomor rekening
+window.copyBankAccount = function(bank, accountNumber) {
+    navigator.clipboard.writeText(accountNumber);
+    showToast('success', `No Rekening ${bank} (${accountNumber}) sudah disalin!`);
+};
+
+// Proses pembayaran
+window.processPayment = async function(orderId, method) {
+    try {
+        await LaundryAPI.updatePesanan(orderId, { statusPembayaran: 'lunas' });
+        closeModal('paymentModal');
+        showToast('success', `Pembayaran via ${method} berhasil! Terima kasih.`);
+        setTimeout(() => loadPage('pesanan'), 1500);
+    } catch(e) {
+        showToast('error', e.message);
+    }
+};
+
 // ============ TRACKING PESANAN (Shopee Style) ==========
 async function renderTracking() {
     await loadData();
@@ -391,7 +503,6 @@ async function renderTracking() {
                                 ${getStatusBadge(o.status)}
                             </div>
                             
-                            <!-- Timeline ala Shopee -->
                             <div class="tracking-steps" style="margin: 20px 0;">
                                 <div class="tracking-line"><div class="line-fill" style="width: ${getProgressWidth(o.status)}%"></div></div>
                                 ${getTrackingSteps(o.status)}
@@ -409,28 +520,9 @@ async function renderTracking() {
                 }
             </div>
         </div>
-        
-        <!-- Google Maps -->
-        <div class="glass-card">
-            <div class="card-header"><span><i class="fas fa-map-marked-alt"></i> Lokasi Laundry & Rute</span></div>
-            <div class="card-body">
-                <div id="trackingMap" style="height: 300px; width: 100%; border-radius: 16px; background: #1E293B; display: flex; align-items: center; justify-content: center;">
-                    <p class="text-muted">🗺️ Google Maps akan muncul di sini.<br>Masukkan API Key untuk mengaktifkan peta.</p>
-                </div>
-                <div class="map-info">
-                    <p><i class="fas fa-map-pin"></i> <strong>Alamat Toko:</strong> Jl. Laundry No.123, Jakarta</p>
-                    <p><i class="fas fa-truck"></i> <strong>Layanan Antar Jemput:</strong> Gratis untuk area Jabodetabek</p>
-                </div>
-            </div>
-        </div>
     `;
     
     document.getElementById('pageContent').innerHTML = html;
-    
-    // Google Maps (jika ada API key)
-    if (typeof google !== 'undefined') {
-        initMap();
-    }
 }
 
 function getProgressWidth(status) {
@@ -463,52 +555,6 @@ function getTrackingSteps(currentStatus) {
         `;
     }).join('');
 }
-
-// ============ PEMBAYARAN ============
-window.showPayment = function(orderId) {
-    const order = myOrders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    const modalHtml = `
-        <div class="modal active" id="paymentModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-credit-card"></i> Metode Pembayaran</h3>
-                    <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <div style="font-size: 28px; font-weight: bold; color: #60A5FA;">${formatRupiah(order.totalBayar)}</div>
-                        <div style="color: #64748B;">Kode Pesanan: ${order.kode}</div>
-                    </div>
-                    <div class="payment-methods">
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'QRIS')"><i class="fas fa-qrcode"></i> QRIS</div>
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'OVO')"><i class="fas fa-mobile-alt"></i> OVO</div>
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'GoPay')"><i class="fas fa-wallet"></i> GoPay</div>
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'Dana')"><i class="fas fa-money-bill"></i> Dana</div>
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'Transfer Bank')"><i class="fas fa-university"></i> Transfer Bank</div>
-                        <div class="payment-btn" onclick="processPayment(${orderId}, 'COD')"><i class="fas fa-hand-holding-usd"></i> COD (Bayar di Tempat)</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const existingModal = document.getElementById('paymentModal');
-    if (existingModal) existingModal.remove();
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-};
-
-window.processPayment = async function(orderId, method) {
-    try {
-        await LaundryAPI.updatePesanan(orderId, { statusPembayaran: 'lunas' });
-        closeModal('paymentModal');
-        showToast('success', `Pembayaran via ${method} berhasil! Terima kasih.`);
-        setTimeout(() => loadPage('pesanan'), 1500);
-    } catch(e) {
-        showToast('error', e.message);
-    }
-};
 
 // ============ TRACKING ORDER (Popup) ==========
 window.trackOrder = function(orderId) {
@@ -548,7 +594,7 @@ window.trackOrder = function(orderId) {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 };
 
-// ============ PROFIL ============
+// ============ PROFIL ==========
 async function renderProfile() {
     await loadData();
     
@@ -626,9 +672,9 @@ window.saveProfile = async function() {
     }
 };
 
-// Export ke window
 window.loadPage = loadPage;
 window.trackOrder = trackOrder;
 window.showStruk = showStruk;
 window.showPayment = showPayment;
 window.processPayment = processPayment;
+window.copyBankAccount = copyBankAccount;

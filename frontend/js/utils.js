@@ -86,8 +86,7 @@ function showToast(type, message) {
     container.appendChild(toast);
     
     setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
+        toast.remove();
     }, 3000);
 }
 
@@ -135,7 +134,7 @@ function createParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
     
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 80; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
         particle.style.left = Math.random() * 100 + '%';

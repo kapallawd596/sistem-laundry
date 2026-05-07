@@ -27,17 +27,6 @@ body {
     background: radial-gradient(circle at 20% 30%, #0F172A, #020617, #000000);
 }
 
-.bg-gradient::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(45deg, rgba(59, 130, 246, 0.03) 0px, rgba(59, 130, 246, 0.03) 2px, transparent 2px, transparent 8px);
-    pointer-events: none;
-}
-
 /* ========== FLOATING PARTICLES ========== */
 .particles {
     position: fixed;
@@ -75,7 +64,7 @@ body {
     height: 100vh;
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(59, 130, 246, 0.2);
+    border-right: 1px solid rgba(59, 130, 246, 0.3);
     z-index: 100;
     transition: all 0.3s ease;
     overflow-y: auto;
@@ -182,6 +171,8 @@ body {
     justify-content: space-between;
     align-items: center;
     border: 1px solid rgba(59, 130, 246, 0.2);
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .datetime {
@@ -220,7 +211,7 @@ body {
     align-items: center;
     gap: 15px;
     background: rgba(59, 130, 246, 0.1);
-    padding: 5px 20px 5px 15px;
+    padding: 5px 20px;
     border-radius: 50px;
 }
 
@@ -310,20 +301,25 @@ body {
     align-items: center;
     font-weight: 600;
     color: white;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .card-body {
     padding: 20px 25px;
+    overflow-x: auto;
 }
 
 /* ========== TABLES ========== */
 .table-wrapper {
     overflow-x: auto;
+    width: 100%;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 600px;
 }
 
 th {
@@ -598,12 +594,13 @@ textarea.form-control {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* ========== TRACKING STEPS (Shopee Style) ========== */
+/* ========== TRACKING STEPS ========== */
 .tracking-steps {
     display: flex;
     justify-content: space-between;
     margin: 30px 0;
     position: relative;
+    flex-wrap: wrap;
 }
 
 .tracking-step {
@@ -611,6 +608,7 @@ textarea.form-control {
     flex: 1;
     position: relative;
     z-index: 2;
+    min-width: 70px;
 }
 
 .tracking-step .step-icon {
@@ -635,7 +633,7 @@ textarea.form-control {
 }
 
 .tracking-step .step-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #94A3B8;
 }
 
@@ -693,6 +691,8 @@ textarea.form-control {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .struk-total {
@@ -709,7 +709,7 @@ textarea.form-control {
     margin-top: 15px;
 }
 
-.payment-btn {
+.payment-option {
     padding: 12px;
     border-radius: 12px;
     border: 1px solid rgba(59, 130, 246, 0.3);
@@ -720,24 +720,52 @@ textarea.form-control {
     text-align: center;
 }
 
-.payment-btn:hover {
+.payment-option:hover {
     background: rgba(59, 130, 246, 0.2);
     transform: translateY(-2px);
 }
 
-/* ========== GOOGLE MAPS ========== */
-#trackingMap {
-    width: 100%;
-    height: 300px;
-    border-radius: 16px;
-    margin-bottom: 15px;
+/* ========== SEARCH FILTER ========== */
+.search-filter {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
-.map-info {
-    background: rgba(30, 41, 59, 0.9);
-    padding: 12px;
+.search-filter input, .search-filter select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.3);
     border-radius: 12px;
-    margin-top: 10px;
+    padding: 10px 16px;
+    color: white;
+}
+
+.search-filter input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.search-filter select {
+    width: 150px;
+}
+
+/* ========== ACTION BUTTONS ========== */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ========== STATUS SELECT ========== */
+.status-select {
+    background: rgba(6, 182, 212, 0.2);
+    border: 1px solid #06B6D4;
+    border-radius: 8px;
+    padding: 5px 10px;
+    color: white;
+    cursor: pointer;
 }
 
 /* ========== RESPONSIVE ========== */
@@ -774,8 +802,8 @@ textarea.form-control {
     }
     
     .top-bar {
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-direction: column;
+        text-align: center;
     }
     
     .tracking-steps {
@@ -789,6 +817,14 @@ textarea.form-control {
     
     .payment-methods {
         grid-template-columns: 1fr;
+    }
+    
+    .search-filter {
+        flex-direction: column;
+    }
+    
+    .search-filter select {
+        width: 100%;
     }
 }
 

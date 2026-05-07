@@ -1,6 +1,7 @@
 /**
  * KARYAWAN DASHBOARD - LaundryPro
- * Fitur: Input berat setelah timbang di toko, update status, update pembayaran
+ * Fitur: Input berat setelah timbang di toko, update status pesanan
+ * ⚠️ KARYAWAN TIDAK BISA UPDATE PEMBAYARAN (hanya admin & pelanggan)
  */
 
 let currentUser = null;
@@ -130,7 +131,7 @@ async function loadDashboard() {
                 <div class="card-body" style="padding:0;">
                     <div class="table-wrapper">
                         <table class="table">
-                            <thead><tr><th>Kode</th><th>Pelanggan</th><th>Total</th><th>Pembayaran</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead>
+                            <thead><tr><th>Kode</th><th>Pelanggan</th><th>Total</th><th>Pembayaran</th><th>Alamat</th><th>Aksi</th></tr></thead>
                             <tbody>
                                 ${pendingPickup.map(p => `
                                     <tr>
@@ -138,9 +139,9 @@ async function loadDashboard() {
                                         <td>${p.pelangganNama}</td>
                                         <td>${formatRupiah(p.totalBayar)}</td>
                                         <td>${getPaymentBadge(p.statusPembayaran)}</td>
-                                        <td>${p.tanggalSelesai || '-'}</td>
+                                        <td>${p.pelangganAlamat || '-'}</td>
                                         <td>
-                                            <button class="btn btn-sm btn-success" onclick="markAsDelivered(${p.id})"><i class="fas fa-check"></i> Sudah Diambil</button>
+                                            <button class="btn btn-sm btn-success" onclick="markAsDelivered(${p.id})"><i class="fas fa-check"></i> Sudah Diambil/Diantar</button>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -195,7 +196,6 @@ window.openInputBerat = function(orderId) {
     
     openModal(html, 'Input Berat Pesanan');
     
-    // Event listener untuk hitung otomatis
     document.getElementById('berat').addEventListener('input', function() {
         const berat = parseFloat(this.value) || 0;
         const total = berat * order.hargaPerKg;
@@ -280,7 +280,7 @@ function renderPesananRow(p) {
             <td>${p.berat ? p.berat + ' kg' : '<span style="color:#F59E0B;">Belum ditimbang</span>'}</td>
             <td>${p.totalBayar ? formatRupiah(p.totalBayar) : '-'}</td>
             <td>${getStatusBadge(p.status)}</td>
-            <td>${getPaymentBadge(p.statusPembayaran)}</td>
+            <td>${getPaymentBadge(p.statusPembayaran)}       <!-- Hanya TAMPIL, tidak bisa diklik -->
             <td class="action-buttons">
                 ${!p.berat ? `<button class="btn btn-sm btn-primary" onclick="openInputBerat(${p.id})"><i class="fas fa-weight-hanging"></i> Timbang</button>` : ''}
                 <select class="status-select" onchange="updateStatus(${p.id}, this.value)" style="background:rgba(6,182,212,0.2); border:1px solid #06B6D4; border-radius:8px; padding:5px 10px; color:white;">
@@ -289,7 +289,7 @@ function renderPesananRow(p) {
                     <option value="selesai" ${p.status === 'selesai' ? 'selected' : ''}>✅ Selesai</option>
                     <option value="diambil" ${p.status === 'diambil' ? 'selected' : ''}>📦 Diambil</option>
                 </select>
-                <button class="btn btn-sm btn-warning" onclick="updatePayment(${p.id})"><i class="fas fa-money-bill"></i> Bayar</button>
+                <!-- ❌ TOMBOL BAYAR DIHAPUS! Karyawan tidak boleh update pembayaran -->
             </td>
         </tr>
     `;
@@ -306,27 +306,15 @@ function filterPesanan() {
     const tbody = document.getElementById('pesananTableBody');
     if (tbody) {
         tbody.innerHTML = filtered.map(p => renderPesananRow(p)).join('');
-        if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>';
+        if (filtered.length === 0) tbody.innerHTML = '<tr><td colspan="8" class="text-center">Tidak ada data</td>' ;
     }
 }
 
-// ============ UPDATE STATUS ============
+// ============ UPDATE STATUS (Karyawan hanya update status cucian) ============
 window.updateStatus = async function(orderId, newStatus) {
     try {
         await LaundryAPI.updatePesanan(orderId, { status: newStatus });
         showToast('success', `Status pesanan berhasil diupdate menjadi ${newStatus}`);
-        await loadData();
-        await loadPage('pesanan');
-    } catch(e) {
-        showToast('error', e.message);
-    }
-};
-
-window.updatePayment = async function(orderId) {
-    const newStatus = confirm('Apakah pembayaran sudah lunas?') ? 'lunas' : 'belum';
-    try {
-        await LaundryAPI.updatePesanan(orderId, { statusPembayaran: newStatus });
-        showToast('success', `Status pembayaran diupdate menjadi ${newStatus === 'lunas' ? 'LUNAS' : 'BELUM LUNAS'}`);
         await loadData();
         await loadPage('pesanan');
     } catch(e) {
@@ -426,7 +414,7 @@ window.simpanTambahPesanan = async function() {
     }
 };
 
-// ============ DATA PELANGGAN (Karyawan bisa lihat & tambah) ============
+// ============ DATA PELANGGAN ============
 async function loadPelanggan() {
     try {
         await loadData();
@@ -539,13 +527,11 @@ window.updateEditPelanggan = async function(id) {
     }
 };
 
-// Export ke window
 window.loadPage = loadPage;
 window.filterPesanan = filterPesanan;
 window.openInputBerat = openInputBerat;
 window.saveBerat = saveBerat;
 window.updateStatus = updateStatus;
-window.updatePayment = updatePayment;
 window.markAsDelivered = markAsDelivered;
 window.showTambahPesanan = showTambahPesanan;
 window.simpanTambahPesanan = simpanTambahPesanan;
