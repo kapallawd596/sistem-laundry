@@ -1,5 +1,5 @@
 /**
- * ADMIN DASHBOARD - LaundryPro
+ * ADMIN DASHBOARD - Laundry int
  * Fitur: Full management (pesanan, pelanggan, layanan, users, laporan)
  */
 

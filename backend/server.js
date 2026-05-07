@@ -35,7 +35,7 @@ let pesanan = [
 ];
 
 let aktivitas = [
-    { id: 1, deskripsi: "Sistem LaundryPro Aktif", tipe: "info", createdAt: new Date().toISOString() }
+    { id: 1, deskripsi: "Sistem Laundry int Aktif", tipe: "info", createdAt: new Date().toISOString() }
 ];
 
 let nextIds = { pelanggan: 3, layanan: 6, pesanan: 2, user: 4, aktivitas: 2 };
@@ -266,7 +266,7 @@ app.get('/api/aktivitas', authenticate, checkRole(['admin', 'karyawan']), (req, 
 app.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════╗
-║     🚀 LaundryPro Server Berjalan! 🚀            ║
+║     🚀 Laundry int Server Berjalan! 🚀            ║
 ╠══════════════════════════════════════════════════╣
 ║  Server: http://localhost:${PORT}                  ║
 ╠══════════════════════════════════════════════════╣

@@ -1,5 +1,5 @@
 /**
- * KARYAWAN DASHBOARD - LaundryPro
+ * KARYAWAN DASHBOARD - Laundry int
  * Fitur: Input berat setelah timbang di toko, update status pesanan
  * ⚠️ KARYAWAN TIDAK BISA UPDATE PEMBAYARAN (hanya admin & pelanggan)
  */

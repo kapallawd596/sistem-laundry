@@ -1,5 +1,5 @@
 /**
- * PELANGGAN DASHBOARD - LaundryPro
+ * PELANGGAN DASHBOARD - Laundry int
  * Fitur: Pesan Laundry (tanpa berat), Tracking, Struk, PEMBAYARAN LENGKAP
  */
 
@@ -304,7 +304,7 @@ window.showStruk = function(orderId) {
                     <div class="struk-container" id="strukContainer">
                         <div class="struk-header">
                             <i class="fas fa-tshirt" style="font-size: 40px; color: #3B82F6;"></i>
-                            <h3>LAUNDRYPRO</h3>
+                            <h3>LAUNDRY INT</h3>
                             <p style="font-size: 12px;">Jl. Laundry No.123, Jakarta<br>Telp: (021) 1234 5678</p>
                         </div>
                         <div class="struk-divider"></div>
@@ -342,7 +342,7 @@ window.showStruk = function(orderId) {
                         ${order.catatan ? `<div class="struk-row"><span>Catatan</span><span>${order.catatan}</span></div>` : ''}
                         
                         <div class="struk-divider"></div>
-                        <div class="struk-header"><p style="font-size: 11px;">Terima Kasih telah menggunakan LaundryPro!<br>⭐ ⭐ ⭐ ⭐ ⭐</p></div>
+                        <div class="struk-header"><p style="font-size: 11px;">Terima Kasih telah menggunakan Laundry int!<br>⭐ ⭐ ⭐ ⭐ ⭐</p></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -362,7 +362,7 @@ window.showStruk = function(orderId) {
         const printContent = document.getElementById('strukContainer').outerHTML;
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
-            <html><head><title>Struk LaundryPro - ${order.kode}</title>
+            <html><head><title>Struk Laundry int - ${order.kode}</title>
             <style>body { font-family: Arial; padding: 20px; } .struk-container { max-width: 400px; margin: 0 auto; } .struk-header { text-align: center; } .struk-divider { border-top: 1px dashed #ccc; margin: 10px 0; } .struk-row { display: flex; justify-content: space-between; margin-bottom: 8px; } .struk-total { font-weight: bold; }</style>
             </head><body>${printContent}</body></html>
         `);
@@ -432,19 +432,19 @@ window.showPayment = function(orderId) {
                         <div class="section-title" style="font-weight: bold; margin-bottom: 10px;"><i class="fas fa-university"></i> Transfer Bank</div>
                         <div class="bank-list">
                             <div class="bank-item" onclick="copyBankAccount('BCA', '1234567890')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
-                                <span><i class="fas fa-building"></i> BCA - 1234567890 a.n LaundryPro</span>
+                                <span><i class="fas fa-building"></i> BCA - 1234567890 a.n Laundry int</span>
                                 <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
                             </div>
                             <div class="bank-item" onclick="copyBankAccount('BNI', '1234567891')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
-                                <span><i class="fas fa-building"></i> BNI - 1234567891 a.n LaundryPro</span>
+                                <span><i class="fas fa-building"></i> BNI - 1234567891 a.n Laundry int</span>
                                 <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
                             </div>
                             <div class="bank-item" onclick="copyBankAccount('BRI', '1234567892')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
-                                <span><i class="fas fa-building"></i> BRI - 1234567892 a.n LaundryPro</span>
+                                <span><i class="fas fa-building"></i> BRI - 1234567892 a.n Laundry int</span>
                                 <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
                             </div>
                             <div class="bank-item" onclick="copyBankAccount('Mandiri', '1234567893')" style="background: rgba(59,130,246,0.1); padding: 12px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between;">
-                                <span><i class="fas fa-building"></i> Mandiri - 1234567893 a.n LaundryPro</span>
+                                <span><i class="fas fa-building"></i> Mandiri - 1234567893 a.n Laundry int</span>
                                 <span style="color: #60A5FA;"><i class="fas fa-copy"></i> Salin</span>
                             </div>
                         </div>

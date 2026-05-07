@@ -1,5 +1,5 @@
 /**
- * AUTHENTICATION - LaundryPro
+ * AUTHENTICATION - Laundry int
  * Login, logout, session management
  */
 

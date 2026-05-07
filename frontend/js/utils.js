@@ -1,5 +1,5 @@
 /**
- * UTILITY FUNCTIONS - LaundryPro
+ * UTILITY FUNCTIONS - Laundry
  * Helper functions yang reusable untuk semua role
  */
 

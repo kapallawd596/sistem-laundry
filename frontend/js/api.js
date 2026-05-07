@@ -1,5 +1,5 @@
 /**
- * API CALLS - LaundryPro
+ * API CALLS - Laundry int
  * Semua fungsi untuk berkomunikasi dengan backend
  */
 
