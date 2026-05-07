@@ -1,5 +1,6 @@
 /**
- * AUTHENTICATION SYSTEM - LaundryPro
+ * AUTHENTICATION - LaundryPro
+ * Login, logout, session management
  */
 
 class Auth {
@@ -38,31 +39,12 @@ class Auth {
 
     async login(email, password) {
         try {
-            const response = await fetch('http://localhost:3000/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await response.json();
+            const data = await LaundryAPI.login(email, password);
             if (data.success) {
                 this.saveSession(data.user, data.token);
                 return { success: true, user: data.user };
             }
             return { success: false, message: data.message };
-        } catch (error) {
-            console.error('Login error:', error);
-            return { success: false, message: error.message };
-        }
-    }
-
-    async register(userData) {
-        try {
-            const response = await fetch('http://localhost:3000/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData)
-            });
-            return await response.json();
         } catch (error) {
             return { success: false, message: error.message };
         }
@@ -77,42 +59,24 @@ class Auth {
         return this.currentUser;
     }
 
-    getUser() {
-        return this.currentUser;
-    }
-
     isLoggedIn() {
         return this.currentUser !== null;
     }
 
-    hasRole(role) {
-        return this.isLoggedIn() && this.currentUser.role === role;
-    }
-
-    getRedirectUrl(role) {
+    getRedirectUrl() {
+        const role = this.currentUser?.role;
         const pages = {
             'admin': '/pages/admin.html',
-            'operator': '/pages/operator.html',
-            'customer': '/pages/user.html'
+            'karyawan': '/pages/karyawan.html',
+            'pelanggan': '/pages/pelanggan.html'
         };
         return pages[role] || '/login.html';
     }
 
-    protectPage(allowedRoles = []) {
-        if (!this.isLoggedIn()) {
-            window.location.href = '/login.html';
-            return false;
-        }
-        if (allowedRoles.length > 0 && !allowedRoles.includes(this.currentUser.role)) {
-            window.location.href = this.getRedirectUrl(this.currentUser.role);
-            return false;
-        }
-        return true;
+    redirectToDashboard() {
+        window.location.href = this.getRedirectUrl();
     }
 }
 
-// Buat instance global
 const auth = new Auth();
-
-// Export ke window
 window.auth = auth;

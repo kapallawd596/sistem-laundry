@@ -1,81 +1,49 @@
 /**
  * ADMIN DASHBOARD - LaundryPro
- * Manajemen lengkap untuk role admin
+ * Fitur: Full management (pesanan, pelanggan, layanan, users, laporan)
  */
 
-// ============ VARIABLES ============
-let currentPage = 'dashboard';
-let currentPesananData = [];
-let currentPelangganData = [];
-let currentLayananData = [];
-let currentUserData = [];
+let currentUser = null;
+let currentPageData = {};
 
 // ============ INITIALIZATION ============
 document.addEventListener('DOMContentLoaded', async () => {
-    // Cek login
-    const user = LaundryAPI.getCurrentUser();
-    if (!user) {
-        window.location.href = '../login.html';
+    currentUser = auth.getCurrentUser();
+    
+    if (!currentUser || currentUser.role !== 'admin') {
+        window.location.href = '/login.html';
         return;
     }
     
-    if (user.role !== 'admin') {
-        alert('Akses ditolak! Hanya admin yang bisa mengakses halaman ini.');
-        window.location.href = '../login.html';
-        return;
-    }
+    document.getElementById('userName').innerText = currentUser.nama;
+    document.getElementById('userAvatar').innerText = currentUser.nama.charAt(0).toUpperCase();
     
-    // Tampilkan nama user
-    document.getElementById('userName').innerText = user.nama;
-    document.getElementById('userAvatar').innerText = user.nama.charAt(0).toUpperCase();
-    
-    // Load dashboard pertama
     await loadDashboard();
     
-    // Setup event listeners
-    setupEventListeners();
+    document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+        item.addEventListener('click', () => loadPage(item.getAttribute('data-page')));
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.logout());
+    
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+    createParticles();
 });
 
-// ============ EVENT LISTENERS ============
-function setupEventListeners() {
-    // Menu items
-    document.querySelectorAll('.menu-item[data-page]').forEach(item => {
-        item.addEventListener('click', () => {
-            const page = item.getAttribute('data-page');
-            changePage(page);
-        });
-    });
+async function loadPage(page) {
+    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+    document.querySelector(`[data-page="${page}"]`).classList.add('active');
     
-    // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-        LaundryAPI.logout();
-    });
-}
-
-// ============ PAGE NAVIGATION ============
-async function changePage(page) {
-    currentPage = page;
-    
-    // Update active menu
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-page') === page) {
-            item.classList.add('active');
-        }
-    });
-    
-    // Update page title
     const titles = {
-        dashboard: 'Dashboard',
-        pesanan: 'Manajemen Pesanan',
-        pelanggan: 'Data Pelanggan',
-        layanan: 'Layanan & Harga',
-        laporan: 'Laporan & Statistik',
-        users: 'Manajemen User'
+        dashboard: 'Dashboard', pesanan: 'Manajemen Pesanan',
+        pelanggan: 'Data Pelanggan', layanan: 'Kelola Layanan',
+        laporan: 'Laporan & Statistik', users: 'Manajemen User'
     };
-    document.getElementById('pageTitle').innerText = titles[page] || page;
+    document.getElementById('pageTitle').innerHTML = `<i class="fas ${page === 'dashboard' ? 'fa-chart-line' : page === 'pesanan' ? 'fa-receipt' : page === 'pelanggan' ? 'fa-users' : page === 'layanan' ? 'fa-tags' : 'fa-chart-pie'}"></i> ${titles[page]}`;
     
-    // Load page content
+    document.getElementById('pageContent').innerHTML = '<div class="loading"><div class="spinner"></div>Memuat data...</div>';
+    
     if (page === 'dashboard') await loadDashboard();
     else if (page === 'pesanan') await loadPesanan();
     else if (page === 'pelanggan') await loadPelanggan();
@@ -84,233 +52,74 @@ async function changePage(page) {
     else if (page === 'users') await loadUsers();
 }
 
-// ============ DASHBOARD ============
+// ============ DASHBOARD ADMIN ============
 async function loadDashboard() {
-    showLoading('pageContent');
-    
     try {
         const stats = await LaundryAPI.getStatistik();
         const aktivitas = await LaundryAPI.getAktivitas();
         const pesananTerbaru = await LaundryAPI.getPesanan({ limit: 5 });
         
         const html = `
-            <!-- STATS GRID -->
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #dbeafe; color: #4361ee;">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <div class="stat-value">${stats.totalPesanan || 0}</div>
-                    <div class="stat-label">Total Pesanan</div>
-                    <div class="stat-change">${getChangePercentage(stats.totalPesanan, 30)} dari bulan lalu</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #d1fae5; color: #10b981;">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <div class="stat-value">${formatRupiah(stats.totalPendapatan || 0)}</div>
-                    <div class="stat-label">Total Pendapatan</div>
-                    <div class="stat-change text-success">↑ 12.5% dari bulan lalu</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #fed7aa; color: #f59e0b;">
-                        <i class="fas fa-spinner"></i>
-                    </div>
-                    <div class="stat-value">${stats.pesananProses || 0}</div>
-                    <div class="stat-label">Dalam Proses</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: #e0e7ff; color: #3730a3;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-value">${stats.totalPelanggan || 0}</div>
-                    <div class="stat-label">Pelanggan Aktif</div>
-                </div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-receipt"></i></div><div class="stat-value">${stats.totalPesanan || 0}</div><div class="stat-label">Total Pesanan</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div><div class="stat-value">${formatRupiah(stats.totalPendapatan || 0)}</div><div class="stat-label">Total Pendapatan</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-spinner"></i></div><div class="stat-value">${stats.pesananProses || 0}</div><div class="stat-label">Dalam Proses</div></div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-value">${stats.totalPelanggan || 0}</div><div class="stat-label">Total Pelanggan</div></div>
             </div>
             
-            <!-- CHART & AKTIVITAS -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chart-line"></i> Pendapatan Per Hari</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="revenueChart" style="max-height: 250px;"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chart-pie"></i> Status Pesanan</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="statusChart" style="max-height: 250px;"></canvas>
-                    </div>
-                </div>
+                <div class="glass-card"><div class="card-header"><span><i class="fas fa-chart-line"></i> Pendapatan 7 Hari</span></div><div class="card-body"><canvas id="revenueChart" style="max-height: 250px;"></canvas></div></div>
+                <div class="glass-card"><div class="card-header"><span><i class="fas fa-chart-pie"></i> Status Pesanan</span></div><div class="card-body"><canvas id="statusChart" style="max-height: 250px;"></canvas></div></div>
             </div>
             
-            <!-- PESANAN TERBARU -->
-            <div class="card">
-                <div class="card-header">
-                    <h3><i class="fas fa-clock"></i> Pesanan Terbaru</h3>
-                    <button class="btn btn-sm btn-primary" onclick="changePage('pesanan')">
-                        Lihat Semua <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-                <div class="table-wrapper">
-                    <table class="table">
-                        <thead>
-                            <tr><th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Total</th><th>Status</th><th>Tanggal</th></tr>
-                        </thead>
-                        <tbody>
-                            ${pesananTerbaru.map(p => `
-                                <tr>
-                                    <td><strong>${p.kode}</strong></td>
-                                    <td>${p.pelangganNama}</td>
-                                    <td>${p.layananNama}</td>
-                                    <td>${formatRupiah(p.totalBayar)}</td>
-                                    <td>${getStatusBadge(p.status)}</td>
-                                    <td>${p.tanggalMasuk}</td>
-                                </tr>
-                            `).join('')}
-                            ${pesananTerbaru.length === 0 ? '<tr><td colspan="6" class="text-center">Belum ada pesanan</td></tr>' : ''}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-clock"></i> Pesanan Terbaru</span><button class="btn btn-sm btn-outline" onclick="loadPage('pesanan')">Lihat Semua</button></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Kode</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Tanggal</th></tr></thead><tbody>
+                ${pesananTerbaru.map(p => `<tr><td><strong>${p.kode}</strong></td><td>${p.pelangganNama}</td><td>${formatRupiah(p.totalBayar)}</td><td>${getStatusBadge(p.status)}</td><td>${p.tanggalMasuk || p.tanggalPesan}</td>`).join('')}
+                ${pesananTerbaru.length === 0 ? '<tr><td colspan="5" class="text-center">Belum ada pesanan</td>' : ''}
+            </tbody></table></div></div></div>
             
-            <!-- AKTIVITAS TERKINI -->
-            <div class="card" style="margin-top: 1.5rem;">
-                <div class="card-header">
-                    <h3><i class="fas fa-history"></i> Aktivitas Terkini</h3>
-                </div>
-                <div class="card-body">
-                    ${aktivitas.map(a => `
-                        <div class="activity-item">
-                            <div class="activity-icon ${a.tipe}">
-                                <i class="fas ${getActivityIcon(a.tipe)}"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-text">${a.deskripsi}</div>
-                                <div class="activity-time">${formatTime(a.createdAt)}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                    ${aktivitas.length === 0 ? '<div class="text-center text-muted">Belum ada aktivitas</div>' : ''}
-                </div>
-            </div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-history"></i> Aktivitas Terkini</span></div><div class="card-body">
+                ${aktivitas.slice(0, 10).map(a => `<p style="margin-bottom:12px;">📌 ${a.deskripsi} <span style="color:#64748B; font-size:11px;">- ${formatDateTime(a.createdAt)}</span></p>`).join('')}
+                ${aktivitas.length === 0 ? '<p class="text-muted">Belum ada aktivitas</p>' : ''}
+            </div></div>
         `;
         
         document.getElementById('pageContent').innerHTML = html;
         
-        // Load charts
-        loadCharts(stats);
-        
-    } catch (error) {
-        showError('pageContent', error.message);
-    }
-}
-
-function loadCharts(stats) {
-    // Chart.js harus sudah di-load
-    if (typeof Chart !== 'undefined') {
-        // Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart')?.getContext('2d');
-        if (revenueCtx) {
-            new Chart(revenueCtx, {
+        if (typeof Chart !== 'undefined') {
+            new Chart(document.getElementById('revenueChart'), {
                 type: 'line',
-                data: {
-                    labels: stats.pendapatanPerHari?.map(d => d.tanggal) || ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                    datasets: [{
-                        label: 'Pendapatan (Rp)',
-                        data: stats.pendapatanPerHari?.map(d => d.total) || [0, 0, 0, 0, 0, 0, 0],
-                        borderColor: '#4361ee',
-                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
+                data: { labels: stats.pendapatanPerHari?.map(d=>d.tanggal) || [], datasets: [{ label: 'Pendapatan', data: stats.pendapatanPerHari?.map(d=>d.total) || [], borderColor: '#3B82F6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] }
             });
-        }
-        
-        // Status Chart
-        const statusCtx = document.getElementById('statusChart')?.getContext('2d');
-        if (statusCtx) {
-            new Chart(statusCtx, {
+            new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
-                data: {
-                    labels: ['Menunggu', 'Proses', 'Selesai', 'Diambil'],
-                    datasets: [{
-                        data: [
-                            stats.pesananMenunggu || 0,
-                            stats.pesananProses || 0,
-                            stats.pesananSelesai || 0,
-                            stats.pesananDiambil || 0
-                        ],
-                        backgroundColor: ['#f59e0b', '#4361ee', '#10b981', '#06b6d4']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
+                data: { labels: ['Menunggu', 'Proses', 'Selesai', 'Diambil'], datasets: [{ data: [stats.pesananMenunggu||0, stats.pesananProses||0, stats.pesananSelesai||0, stats.pesananDiambil||0], backgroundColor: ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6'] }] }
             });
         }
+    } catch(e) {
+        document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
     }
 }
 
-// ============ PESANAN MANAGEMENT ============
+// ============ MANAJEMEN PESANAN ============
 async function loadPesanan() {
-    showLoading('pageContent');
-    
     try {
         const pesanan = await LaundryAPI.getPesanan();
-        currentPesananData = pesanan;
+        currentPageData.pesanan = pesanan;
         
         const html = `
-            <div style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="showTambahPesanan()">
-                    <i class="fas fa-plus"></i> Tambah Pesanan
-                </button>
-                <div style="flex: 1; max-width: 300px;">
-                    <input type="text" id="searchPesanan" class="form-control" placeholder="🔍 Cari pesanan..." onkeyup="filterPesanan()">
-                </div>
-                <select id="statusFilter" class="form-control" style="width: 150px;" onchange="filterPesanan()">
-                    <option value="">Semua Status</option>
-                    <option value="menunggu">Menunggu</option>
-                    <option value="proses">Proses</option>
-                    <option value="selesai">Selesai</option>
-                    <option value="diambil">Diambil</option>
-                </select>
+            <div class="search-filter">
+                <input type="text" id="searchPesanan" placeholder="🔍 Cari kode atau pelanggan..." onkeyup="filterPesanan()">
+                <select id="statusFilter" onchange="filterPesanan()"><option value="">Semua Status</option><option value="menunggu">Menunggu</option><option value="proses">Proses</option><option value="selesai">Selesai</option><option value="diambil">Diambil</option></select>
+                <button class="btn btn-primary" onclick="showTambahPesanan()"><i class="fas fa-plus"></i> Tambah Pesanan</button>
             </div>
-            
-            <div class="table-wrapper">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Pembayaran</th><th>Tgl Masuk</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pesananTableBody">
-                        ${pesanan.map(p => renderPesananRow(p)).join('')}
-                    </tbody>
-                </table>
-            </div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-receipt"></i> Daftar Pesanan</span></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Pembayaran</th><th>Aksi</th></tr></thead><tbody id="pesananTableBody">${pesanan.map(p => renderPesananRow(p)).join('')}</tbody></table></div></div></div>
         `;
-        
         document.getElementById('pageContent').innerHTML = html;
-        
-    } catch (error) {
-        showError('pageContent', error.message);
+        window.filterPesanan = filterPesanan;
+    } catch(e) {
+        document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
     }
 }
 
@@ -320,21 +129,13 @@ function renderPesananRow(p) {
             <td><strong>${p.kode}</strong></td>
             <td>${p.pelangganNama}<br><small class="text-muted">${p.pelangganHp || ''}</small></td>
             <td>${p.layananNama}</td>
-            <td>${p.berat} kg</td>
+            <td>${p.berat ? p.berat + ' kg' : '-'}</td>
             <td>${formatRupiah(p.totalBayar)}</td>
             <td>${getStatusBadge(p.status)}</td>
             <td>${getPaymentBadge(p.statusPembayaran)}</td>
-            <td>${p.tanggalMasuk}</td>
-            <td>
-                <button class="btn btn-sm btn-outline" onclick="viewPesanan(${p.id})" title="Detail">
-                    <i class="fas fa-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline" onclick="editPesanan(${p.id})" title="Edit">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deletePesanan(${p.id})" title="Hapus">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <td class="action-buttons">
+                <button class="btn btn-sm btn-primary" onclick="editPesanan(${p.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${p.id})"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
     `;
@@ -343,401 +144,42 @@ function renderPesananRow(p) {
 function filterPesanan() {
     const search = document.getElementById('searchPesanan')?.value.toLowerCase() || '';
     const status = document.getElementById('statusFilter')?.value || '';
-    
-    const filtered = currentPesananData.filter(p => {
-        const matchSearch = p.kode.toLowerCase().includes(search) || 
-                           p.pelangganNama.toLowerCase().includes(search);
+    const filtered = (currentPageData.pesanan || []).filter(p => {
+        const matchSearch = p.kode.toLowerCase().includes(search) || p.pelangganNama.toLowerCase().includes(search);
         const matchStatus = !status || p.status === status;
         return matchSearch && matchStatus;
     });
-    
     const tbody = document.getElementById('pesananTableBody');
-    if (tbody) {
-        tbody.innerHTML = filtered.map(p => renderPesananRow(p)).join('');
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Tidak ada data</td></tr>';
-        }
-    }
+    if (tbody) tbody.innerHTML = filtered.map(p => renderPesananRow(p)).join('') || '<tr><td colspan="8" class="text-center">Tidak ada数据</td>';
 }
 
-// ============ PELANGGAN MANAGEMENT ============
-async function loadPelanggan() {
-    showLoading('pageContent');
-    
-    try {
-        const pelanggan = await LaundryAPI.getPelanggan();
-        currentPelangganData = pelanggan;
-        
-        const html = `
-            <div style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="showTambahPelanggan()">
-                    <i class="fas fa-plus"></i> Tambah Pelanggan
-                </button>
-                <div style="flex: 1; max-width: 300px;">
-                    <input type="text" id="searchPelanggan" class="form-control" placeholder="🔍 Cari pelanggan..." onkeyup="filterPelanggan()">
-                </div>
-            </div>
-            
-            <div class="table-wrapper">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nama</th><th>Email</th><th>No HP</th><th>Alamat</th><th>Poin</th><th>Transaksi</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pelangganTableBody">
-                        ${pelanggan.map(p => renderPelangganRow(p)).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        document.getElementById('pageContent').innerHTML = html;
-        
-    } catch (error) {
-        showError('pageContent', error.message);
-    }
-}
-
-function renderPelangganRow(p) {
-    return `
-        <tr>
-            <td><strong>${p.nama}</strong></td>
-            <td>${p.email || '-'}</td>
-            <td>${p.no_hp}</td>
-            <td>${p.alamat || '-'}</td>
-            <td><span class="badge badge-primary">${p.poin || 0} poin</span></td>
-            <td>${p.totalTransaksi || 0}x</td>
-            <td>
-                <button class="btn btn-sm btn-outline" onclick="editPelanggan(${p.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deletePelanggan(${p.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-        </tr>
-    `;
-}
-
-function filterPelanggan() {
-    const search = document.getElementById('searchPelanggan')?.value.toLowerCase() || '';
-    
-    const filtered = currentPelangganData.filter(p => 
-        p.nama.toLowerCase().includes(search) || 
-        p.no_hp.includes(search) ||
-        (p.email && p.email.toLowerCase().includes(search))
-    );
-    
-    const tbody = document.getElementById('pelangganTableBody');
-    if (tbody) {
-        tbody.innerHTML = filtered.map(p => renderPelangganRow(p)).join('');
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data</td></tr>';
-        }
-    }
-}
-
-// ============ LAYANAN MANAGEMENT ============
-async function loadLayanan() {
-    showLoading('pageContent');
-    
-    try {
-        const layanan = await LaundryAPI.getLayanan();
-        currentLayananData = layanan;
-        
-        const html = `
-            <div style="margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="showTambahLayanan()">
-                    <i class="fas fa-plus"></i> Tambah Layanan
-                </button>
-            </div>
-            
-            <div class="table-wrapper">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Icon</th><th>Nama Layanan</th><th>Harga/kg</th><th>Estimasi</th><th>Deskripsi</th><th>Status</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${layanan.map(l => `
-                            <tr>
-                                <td><i class="fas ${l.icon || 'fa-tshirt'}"></i></td>
-                                <td><strong>${l.nama}</strong></td>
-                                <td>${formatRupiah(l.harga)}</td>
-                                <td>${l.estimasi}</td>
-                                <td>${l.deskripsi || '-'}</td>
-                                <td>${getStatusBadge(l.status || 'active')}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline" onclick="editLayanan(${l.id})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteLayanan(${l.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        document.getElementById('pageContent').innerHTML = html;
-        
-    } catch (error) {
-        showError('pageContent', error.message);
-    }
-}
-
-// ============ LAPORAN ============
-async function loadLaporan() {
-    showLoading('pageContent');
-    
-    try {
-        const stats = await LaundryAPI.getStatistik();
-        const pesanan = await LaundryAPI.getPesanan();
-        
-        // Hitung layanan terpopuler
-        const layananCount = {};
-        pesanan.forEach(p => {
-            layananCount[p.layananNama] = (layananCount[p.layananNama] || 0) + 1;
-        });
-        const topLayanan = Object.entries(layananCount)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-        
-        const html = `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">${stats.totalPesanan || 0}</div>
-                    <div class="stat-label">Total Pesanan</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${formatRupiah(stats.totalPendapatan || 0)}</div>
-                    <div class="stat-label">Total Pendapatan</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${stats.totalPelanggan || 0}</div>
-                    <div class="stat-label">Pelanggan Terdaftar</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${stats.totalLayanan || 0}</div>
-                    <div class="stat-label">Layanan Aktif</div>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-chart-pie"></i> Status Pesanan</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="laporanStatusChart" style="max-height: 250px;"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-trophy"></i> Layanan Terpopuler</h3>
-                    </div>
-                    <div class="card-body">
-                        ${topLayanan.map(([nama, count]) => `
-                            <div style="margin-bottom: 1rem;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
-                                    <span>${nama}</span>
-                                    <span>${count} pesanan</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-primary" style="width: ${(count / pesanan.length) * 100}%"></div>
-                                </div>
-                            </div>
-                        `).join('')}
-                        ${topLayanan.length === 0 ? '<div class="text-center text-muted">Belum ada data</div>' : ''}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card" style="margin-top: 1.5rem;">
-                <div class="card-header">
-                    <h3><i class="fas fa-download"></i> Export Laporan</h3>
-                </div>
-                <div class="card-body">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <button class="btn btn-outline" onclick="exportLaporan('pdf')">
-                            <i class="fas fa-file-pdf"></i> Export PDF
-                        </button>
-                        <button class="btn btn-outline" onclick="exportLaporan('excel')">
-                            <i class="fas fa-file-excel"></i> Export Excel
-                        </button>
-                        <button class="btn btn-outline" onclick="window.print()">
-                            <i class="fas fa-print"></i> Print
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('pageContent').innerHTML = html;
-        
-        // Load chart
-        if (typeof Chart !== 'undefined') {
-            const ctx = document.getElementById('laporanStatusChart')?.getContext('2d');
-            if (ctx) {
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Menunggu', 'Proses', 'Selesai', 'Diambil'],
-                        datasets: [{
-                            data: [
-                                stats.pesananMenunggu || 0,
-                                stats.pesananProses || 0,
-                                stats.pesananSelesai || 0,
-                                stats.pesananDiambil || 0
-                            ],
-                            backgroundColor: ['#f59e0b', '#4361ee', '#10b981', '#06b6d4']
-                        }]
-                    }
-                });
-            }
-        }
-        
-    } catch (error) {
-        showError('pageContent', error.message);
-    }
-}
-
-// ============ USERS MANAGEMENT (ADMIN ONLY) ============
-async function loadUsers() {
-    showLoading('pageContent');
-    
-    try {
-        const users = await LaundryAPI.getUsers();
-        currentUserData = users;
-        
-        const html = `
-            <div style="margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="showTambahUser()">
-                    <i class="fas fa-plus"></i> Tambah User
-                </button>
-            </div>
-            
-            <div class="table-wrapper">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Nama</th><th>Email</th><th>Role</th><th>No HP</th><th>Alamat</th><th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${users.map(u => `
-                            <tr>
-                                <td><strong>${u.nama}</strong></td>
-                                <td>${u.email}</td>
-                                <td>${getRoleBadge(u.role)}</td>
-                                <td>${u.no_hp || '-'}</td>
-                                <td>${u.alamat || '-'}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline" onclick="editUser(${u.id})">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        document.getElementById('pageContent').innerHTML = html;
-        
-    } catch (error) {
-        showError('pageContent', error.message);
-    }
-}
-
-// ============ CRUD OPERATIONS ============
-async function showTambahPesanan() {
+window.showTambahPesanan = async function() {
     const pelanggan = await LaundryAPI.getPelanggan();
     const layanan = await LaundryAPI.getLayanan();
-    
-    const modalHtml = `
-        <div class="modal active" id="pesananModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-plus"></i> Tambah Pesanan</h3>
-                    <button class="modal-close" onclick="closeModal('pesananModal')">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="formPesanan">
-                        <div class="form-group">
-                            <label class="form-label required">Pelanggan</label>
-                            <select id="pelangganId" class="form-control" required>
-                                <option value="">Pilih Pelanggan</option>
-                                ${pelanggan.map(p => `<option value="${p.id}">${p.nama} - ${p.no_hp}</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label required">Layanan</label>
-                            <select id="layananId" class="form-control" required onchange="hitungTotalPesanan()">
-                                <option value="">Pilih Layanan</option>
-                                ${layanan.map(l => `<option value="${l.id}" data-harga="${l.harga}">${l.nama} - ${formatRupiah(l.harga)}/kg</option>`).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label required">Berat (kg)</label>
-                            <input type="number" id="berat" class="form-control" step="0.5" min="0.5" value="1" oninput="hitungTotalPesanan()" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Total Harga</label>
-                            <input type="text" id="totalHarga" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Diskon</label>
-                            <input type="number" id="diskon" class="form-control" value="0" oninput="hitungTotalPesanan()">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Status Pembayaran</label>
-                            <select id="statusPembayaran" class="form-control">
-                                <option value="belum">Belum Lunas</option>
-                                <option value="lunas">Lunas</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Catatan</label>
-                            <textarea id="catatan" class="form-control" rows="2"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline" onclick="closeModal('pesananModal')">Batal</button>
-                    <button class="btn btn-primary" onclick="simpanPesanan()">Simpan</button>
-                </div>
-            </div>
-        </div>
+    const html = `
+        <form id="formPesanan">
+            <div class="form-group"><label class="form-label">Pelanggan</label><select id="pelangganId" class="form-control" required><option value="">Pilih Pelanggan</option>${pelanggan.map(p => `<option value="${p.id}" data-nama="${p.nama}" data-hp="${p.no_hp}">${p.nama} - ${p.no_hp}</option>`).join('')}</select></div>
+            <div class="form-group"><label class="form-label">Layanan</label><select id="layananId" class="form-control" required onchange="hitungTotal()"><option value="">Pilih Layanan</option>${layanan.map(l => `<option value="${l.id}" data-harga="${l.harga}">${l.nama} - ${formatRupiah(l.harga)}/kg</option>`).join('')}</select></div>
+            <div class="form-group"><label class="form-label">Berat (kg)</label><input type="number" id="berat" class="form-control" step="0.5" min="0.5" value="1" oninput="hitungTotal()" required></div>
+            <div class="form-group"><label class="form-label">Total Harga</label><input type="text" id="totalHarga" class="form-control" readonly></div>
+            <div class="form-group"><label class="form-label">Diskon</label><input type="number" id="diskon" class="form-control" value="0" oninput="hitungTotal()"></div>
+            <div class="form-group"><label class="form-label">Status Pembayaran</label><select id="statusPembayaran" class="form-control"><option value="belum">Belum Lunas</option><option value="lunas">Lunas</option></select></div>
+            <div class="form-group"><label class="form-label">Catatan</label><textarea id="catatan" class="form-control" rows="2"></textarea></div>
+        </form>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="simpanPesanan()">Simpan</button></div>
     `;
-    
-    // Append modal ke body
-    const existingModal = document.getElementById('pesananModal');
-    if (existingModal) existingModal.remove();
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
+    openModal(html, 'Tambah Pesanan');
+    window.hitungTotal = function() {
+        const select = document.getElementById('layananId');
+        const harga = parseInt(select.options[select.selectedIndex]?.dataset?.harga || 0);
+        const berat = parseFloat(document.getElementById('berat')?.value || 0);
+        const diskon = parseFloat(document.getElementById('diskon')?.value || 0);
+        const total = (harga * berat) - diskon;
+        document.getElementById('totalHarga').value = formatRupiah(total > 0 ? total : 0);
+    };
+};
 
-function hitungTotalPesanan() {
-    const layananSelect = document.getElementById('layananId');
-    const selectedOption = layananSelect.options[layananSelect.selectedIndex];
-    const harga = parseInt(selectedOption?.dataset?.harga || 0);
-    const berat = parseFloat(document.getElementById('berat')?.value || 0);
-    const diskon = parseFloat(document.getElementById('diskon')?.value || 0);
-    
-    const total = (harga * berat) - diskon;
-    document.getElementById('totalHarga').value = formatRupiah(total > 0 ? total : 0);
-}
-
-async function simpanPesanan() {
+window.simpanPesanan = async function() {
     const pelangganId = document.getElementById('pelangganId').value;
     const layananId = document.getElementById('layananId').value;
     const berat = parseFloat(document.getElementById('berat').value);
@@ -745,141 +187,255 @@ async function simpanPesanan() {
     const statusPembayaran = document.getElementById('statusPembayaran').value;
     const catatan = document.getElementById('catatan').value;
     
-    if (!pelangganId || !layananId || !berat) {
-        alert('Mohon lengkapi data!');
-        return;
-    }
+    if (!pelangganId || !layananId || !berat) { showToast('error', 'Lengkapi data!'); return; }
     
-    // Get data pelanggan dan layanan
     const pelanggan = await LaundryAPI.getPelanggan();
     const layanan = await LaundryAPI.getLayanan();
     const selectedPelanggan = pelanggan.find(p => p.id == pelangganId);
     const selectedLayanan = layanan.find(l => l.id == layananId);
     
-    const totalHarga = (selectedLayanan.harga * berat) - diskon;
-    
     const newPesanan = {
-        pelangganId: parseInt(pelangganId),
-        pelangganNama: selectedPelanggan.nama,
-        pelangganHp: selectedPelanggan.no_hp,
-        layananId: parseInt(layananId),
-        layananNama: selectedLayanan.nama,
-        berat: berat,
-        hargaPerKg: selectedLayanan.harga,
-        totalHarga: selectedLayanan.harga * berat,
-        diskon: diskon,
-        totalBayar: totalHarga,
-        status: "menunggu",
-        statusPembayaran: statusPembayaran,
-        tanggalMasuk: new Date().toISOString().split('T')[0],
-        catatan: catatan,
-        operatorId: LaundryAPI.getCurrentUser()?.id
+        pelangganId: parseInt(pelangganId), pelangganNama: selectedPelanggan.nama, pelangganHp: selectedPelanggan.no_hp,
+        layananId: parseInt(layananId), layananNama: selectedLayanan.nama, berat: berat,
+        hargaPerKg: selectedLayanan.harga, totalHarga: selectedLayanan.harga * berat,
+        diskon: diskon, totalBayar: (selectedLayanan.harga * berat) - diskon,
+        status: "menunggu", statusPembayaran: statusPembayaran, catatan: catatan,
+        tanggalMasuk: new Date().toISOString().split('T')[0]
     };
-    
     try {
         await LaundryAPI.addPesanan(newPesanan);
-        closeModal('pesananModal');
-        await loadPesanan();
+        closeModal('dynamicModal');
         showToast('success', 'Pesanan berhasil ditambahkan!');
-    } catch (error) {
-        showToast('error', error.message);
+        loadPage('pesanan');
+    } catch(e) { showToast('error', e.message); }
+};
+
+window.editPesanan = async function(id) {
+    const pesanan = await LaundryAPI.getPesanan();
+    const p = pesanan.find(p => p.id === id);
+    const html = `
+        <form><div class="form-group"><label class="form-label">Status</label><select id="status" class="form-control"><option ${p.status==='menunggu'?'selected':''}>menunggu</option><option ${p.status==='proses'?'selected':''}>proses</option><option ${p.status==='selesai'?'selected':''}>selesai</option><option ${p.status==='diambil'?'selected':''}>diambil</option></select></div>
+        <div class="form-group"><label class="form-label">Status Pembayaran</label><select id="statusPembayaran" class="form-control"><option ${p.statusPembayaran==='belum'?'selected':''}>belum</option><option ${p.statusPembayaran==='lunas'?'selected':''}>lunas</option></select></div>
+        <div class="form-group"><label class="form-label">Catatan</label><textarea id="catatan" class="form-control" rows="2">${p.catatan || ''}</textarea></div></form>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="updatePesanan(${id})">Update</button></div>
+    `;
+    openModal(html, 'Edit Pesanan');
+    window.updatePesanan = async function(orderId) {
+        const status = document.getElementById('status').value;
+        const statusPembayaran = document.getElementById('statusPembayaran').value;
+        const catatan = document.getElementById('catatan').value;
+        try {
+            await LaundryAPI.updatePesanan(orderId, { status, statusPembayaran, catatan });
+            closeModal('dynamicModal');
+            showToast('success', 'Pesanan berhasil diupdate!');
+            loadPage('pesanan');
+        } catch(e) { showToast('error', e.message); }
+    };
+};
+
+window.hapusPesanan = async function(id) {
+    if (confirm('Yakin hapus pesanan ini?')) {
+        try {
+            await LaundryAPI.deletePesanan(id);
+            showToast('success', 'Pesanan dihapus');
+            loadPage('pesanan');
+        } catch(e) { showToast('error', e.message); }
     }
-}
+};
 
-// ============ HELPER FUNCTIONS ============
-function formatRupiah(angka) {
-    return 'Rp ' + angka.toLocaleString('id-ID');
-}
-
-function formatTime(dateString) {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleString('id-ID');
-}
-
-function getStatusBadge(status) {
-    const statusMap = {
-        'menunggu': 'badge-warning',
-        'proses': 'badge-info',
-        'selesai': 'badge-success',
-        'diambil': 'badge-primary',
-        'active': 'badge-success'
-    };
-    return `<span class="badge ${statusMap[status] || 'badge-secondary'}">${status}</span>`;
-}
-
-function getPaymentBadge(status) {
-    if (status === 'lunas') {
-        return '<span class="badge badge-success">Lunas</span>';
-    }
-    return '<span class="badge badge-danger">Belum Lunas</span>';
-}
-
-function getRoleBadge(role) {
-    const roleMap = {
-        'admin': 'badge-danger',
-        'operator': 'badge-info',
-        'customer': 'badge-primary'
-    };
-    return `<span class="badge ${roleMap[role]}">${role}</span>`;
-}
-
-function getActivityIcon(tipe) {
-    const iconMap = {
-        'success': 'fa-check-circle',
-        'error': 'fa-exclamation-circle',
-        'warning': 'fa-exclamation-triangle',
-        'info': 'fa-info-circle'
-    };
-    return iconMap[tipe] || 'fa-bell';
-}
-
-function getChangePercentage(current, previous) {
-    if (!previous) return 'Data baru';
-    const change = ((current - previous) / previous * 100).toFixed(1);
-    return change > 0 ? `↑ ${change}%` : `↓ ${Math.abs(change)}%`;
-}
-
-function showLoading(containerId) {
-    const container = document.getElementById(containerId);
-    if (container) {
-        container.innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <span style="margin-left: 1rem;">Memuat data...</span>
-            </div>
+// ============ MANAJEMEN PELANGGAN ============
+async function loadPelanggan() {
+    try {
+        const pelanggan = await LaundryAPI.getPelanggan();
+        currentPageData.pelanggan = pelanggan;
+        const html = `
+            <div class="search-filter"><input type="text" id="searchPelanggan" placeholder="🔍 Cari nama atau no HP..." onkeyup="filterPelanggan()"><button class="btn btn-primary" onclick="showTambahPelanggan()"><i class="fas fa-plus"></i> Tambah Pelanggan</button></div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-users"></i> Daftar Pelanggan</span></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Nama</th><th>Email</th><th>No HP</th><th>Alamat</th><th>Poin</th><th>Aksi</th></tr></thead><tbody id="pelangganTableBody">${pelanggan.map(p => renderPelangganRow(p)).join('')}</tbody></table></div></div></div>
         `;
-    }
+        document.getElementById('pageContent').innerHTML = html;
+        window.filterPelanggan = filterPelanggan;
+    } catch(e) { document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`; }
 }
 
-function showError(containerId, message) {
-    const container = document.getElementById(containerId);
-    if (container) {
-        container.innerHTML = `
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                ${message}
-            </div>
+function renderPelangganRow(p) {
+    return `<tr><td><strong>${p.nama}</strong></td><td>${p.email || '-'}</td><td>${p.no_hp}</td><td>${p.alamat || '-'}</td><td>${p.poin || 0}</td><td class="action-buttons"><button class="btn btn-sm btn-primary" onclick="editPelanggan(${p.id})"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+}
+
+function filterPelanggan() {
+    const search = document.getElementById('searchPelanggan')?.value.toLowerCase() || '';
+    const filtered = (currentPageData.pelanggan || []).filter(p => p.nama.toLowerCase().includes(search) || p.no_hp.includes(search));
+    const tbody = document.getElementById('pelangganTableBody');
+    if (tbody) tbody.innerHTML = filtered.map(p => renderPelangganRow(p)).join('') || '<tr><td colspan="6" class="text-center">Tidak ada数据</td>';
+}
+
+window.showTambahPelanggan = function() {
+    const html = `<form><div class="form-group"><label class="form-label">Nama</label><input id="nama" class="form-control" required></div><div class="form-group"><label class="form-label">Email</label><input id="email" type="email" class="form-control"></div><div class="form-group"><label class="form-label">No HP</label><input id="no_hp" class="form-control" required></div><div class="form-group"><label class="form-label">Alamat</label><textarea id="alamat" class="form-control" rows="2"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="simpanPelanggan()">Simpan</button></div></form>`;
+    openModal(html, 'Tambah Pelanggan');
+    window.simpanPelanggan = async function() {
+        const data = { nama: document.getElementById('nama').value, email: document.getElementById('email').value, no_hp: document.getElementById('no_hp').value, alamat: document.getElementById('alamat').value };
+        try {
+            await LaundryAPI.addPelanggan(data);
+            closeModal('dynamicModal');
+            showToast('success', 'Pelanggan ditambahkan');
+            loadPage('pelanggan');
+        } catch(e) { showToast('error', e.message); }
+    };
+};
+
+window.editPelanggan = async function(id) {
+    const pelanggan = await LaundryAPI.getPelanggan();
+    const p = pelanggan.find(p => p.id === id);
+    const html = `<form><div class="form-group"><label class="form-label">Nama</label><input id="nama" class="form-control" value="${p.nama}" required></div><div class="form-group"><label class="form-label">Email</label><input id="email" class="form-control" value="${p.email || ''}"></div><div class="form-group"><label class="form-label">No HP</label><input id="no_hp" class="form-control" value="${p.no_hp}" required></div><div class="form-group"><label class="form-label">Alamat</label><textarea id="alamat" class="form-control" rows="2">${p.alamat || ''}</textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="updatePelanggan(${id})">Update</button></div></form>`;
+    openModal(html, 'Edit Pelanggan');
+    window.updatePelanggan = async function(pelId) {
+        const data = { nama: document.getElementById('nama').value, email: document.getElementById('email').value, no_hp: document.getElementById('no_hp').value, alamat: document.getElementById('alamat').value };
+        try {
+            await LaundryAPI.updatePelanggan(pelId, data);
+            closeModal('dynamicModal');
+            showToast('success', 'Pelanggan diupdate');
+            loadPage('pelanggan');
+        } catch(e) { showToast('error', e.message); }
+    };
+};
+
+window.hapusPelanggan = async function(id) {
+    if (confirm('Yakin hapus pelanggan ini?')) {
+        try {
+            await LaundryAPI.deletePelanggan(id);
+            showToast('success', 'Pelanggan dihapus');
+            loadPage('pelanggan');
+        } catch(e) { showToast('error', e.message); }
+    }
+};
+
+// ============ MANAJEMEN LAYANAN ============
+async function loadLayanan() {
+    try {
+        const layanan = await LaundryAPI.getLayanan();
+        currentPageData.layanan = layanan;
+        const html = `
+            <div style="margin-bottom:1rem;"><button class="btn btn-primary" onclick="showTambahLayanan()"><i class="fas fa-plus"></i> Tambah Layanan</button></div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-tags"></i> Daftar Layanan</span></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Nama</th><th>Harga/kg</th><th>Estimasi</th><th>Deskripsi</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${layanan.map(l => renderLayananRow(l)).join('')}</tbody></table></div></div></div>
         `;
+        document.getElementById('pageContent').innerHTML = html;
+    } catch(e) { document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`; }
+}
+
+function renderLayananRow(l) {
+    return `<tr><td><strong>${l.nama}</strong></td><td>${formatRupiah(l.harga)}</td><td>${l.estimasi}</td><td>${l.deskripsi || '-'}</td><td>${getStatusBadge(l.status)}</td><td class="action-buttons"><button class="btn btn-sm btn-primary" onclick="editLayanan(${l.id})"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="hapusLayanan(${l.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+}
+
+window.showTambahLayanan = function() {
+    const html = `<form><div class="form-group"><label class="form-label">Nama Layanan</label><input id="nama" class="form-control" required></div><div class="form-group"><label class="form-label">Harga/kg</label><input id="harga" type="number" class="form-control" required></div><div class="form-group"><label class="form-label">Estimasi</label><input id="estimasi" class="form-control" placeholder="1x24 jam" required></div><div class="form-group"><label class="form-label">Deskripsi</label><textarea id="deskripsi" class="form-control" rows="2"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="simpanLayanan()">Simpan</button></div></form>`;
+    openModal(html, 'Tambah Layanan');
+    window.simpanLayanan = async function() {
+        const data = { nama: document.getElementById('nama').value, harga: parseInt(document.getElementById('harga').value), estimasi: document.getElementById('estimasi').value, deskripsi: document.getElementById('deskripsi').value };
+        try {
+            await LaundryAPI.addLayanan(data);
+            closeModal('dynamicModal');
+            showToast('success', 'Layanan ditambahkan');
+            loadPage('layanan');
+        } catch(e) { showToast('error', e.message); }
+    };
+};
+
+window.editLayanan = async function(id) {
+    const layanan = await LaundryAPI.getLayanan();
+    const l = layanan.find(l => l.id === id);
+    const html = `<form><div class="form-group"><label class="form-label">Nama Layanan</label><input id="nama" class="form-control" value="${l.nama}" required></div><div class="form-group"><label class="form-label">Harga/kg</label><input id="harga" type="number" class="form-control" value="${l.harga}" required></div><div class="form-group"><label class="form-label">Estimasi</label><input id="estimasi" class="form-control" value="${l.estimasi}" required></div><div class="form-group"><label class="form-label">Deskripsi</label><textarea id="deskripsi" class="form-control" rows="2">${l.deskripsi || ''}</textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="updateLayanan(${id})">Update</button></div></form>`;
+    openModal(html, 'Edit Layanan');
+    window.updateLayanan = async function(layId) {
+        const data = { nama: document.getElementById('nama').value, harga: parseInt(document.getElementById('harga').value), estimasi: document.getElementById('estimasi').value, deskripsi: document.getElementById('deskripsi').value };
+        try {
+            await LaundryAPI.updateLayanan(layId, data);
+            closeModal('dynamicModal');
+            showToast('success', 'Layanan diupdate');
+            loadPage('layanan');
+        } catch(e) { showToast('error', e.message); }
+    };
+};
+
+window.hapusLayanan = async function(id) {
+    if (confirm('Yakin hapus layanan ini?')) {
+        try {
+            await LaundryAPI.deleteLayanan(id);
+            showToast('success', 'Layanan dihapus');
+            loadPage('layanan');
+        } catch(e) { showToast('error', e.message); }
     }
+};
+
+// ============ LAPORAN ============
+async function loadLaporan() {
+    try {
+        const stats = await LaundryAPI.getStatistik();
+        const pesanan = await LaundryAPI.getPesanan();
+        const layananCount = {};
+        pesanan.forEach(p => { layananCount[p.layananNama] = (layananCount[p.layananNama] || 0) + 1; });
+        const topLayanan = Object.entries(layananCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        
+        const html = `
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value">${stats.totalPesanan || 0}</div><div class="stat-label">Total Pesanan</div></div>
+                <div class="stat-card"><div class="stat-value">${formatRupiah(stats.totalPendapatan || 0)}</div><div class="stat-label">Total Pendapatan</div></div>
+                <div class="stat-card"><div class="stat-value">${stats.totalPelanggan || 0}</div><div class="stat-label">Pelanggan</div></div>
+                <div class="stat-card"><div class="stat-value">${stats.totalLayanan || 0}</div><div class="stat-label">Layanan</div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="glass-card"><div class="card-header"><span><i class="fas fa-chart-pie"></i> Status Pesanan</span></div><div class="card-body"><canvas id="laporanChart"></canvas></div></div>
+                <div class="glass-card"><div class="card-header"><span><i class="fas fa-trophy"></i> Layanan Terpopuler</span></div><div class="card-body">${topLayanan.map(([nama,count]) => `<div style="margin-bottom:1rem;"><div>${nama} - ${count} pesanan</div><div class="progress" style="height:8px; background:#334155; border-radius:4px; margin-top:5px;"><div style="width:${(count/pesanan.length)*100}%; height:100%; background:#3B82F6; border-radius:4px;"></div></div></div>`).join('')}${topLayanan.length===0?'<p class="text-center">Belum ada data</p>':''}</div></div>
+            </div>
+            <div class="glass-card" style="margin-top:1.5rem;"><div class="card-header"><span><i class="fas fa-download"></i> Export Laporan</span></div><div class="card-body"><div style="display:flex; gap:1rem;"><button class="btn btn-outline" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> PDF</button><button class="btn btn-outline" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button><button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> Print</button></div></div></div>
+        `;
+        document.getElementById('pageContent').innerHTML = html;
+        if (typeof Chart !== 'undefined') {
+            new Chart(document.getElementById('laporanChart'), {
+                type: 'doughnut',
+                data: { labels: ['Menunggu', 'Proses', 'Selesai', 'Diambil'], datasets: [{ data: [stats.pesananMenunggu||0, stats.pesananProses||0, stats.pesananSelesai||0, stats.pesananDiambil||0], backgroundColor: ['#F59E0B', '#3B82F6', '#10B981', '#8B5CF6'] }] }
+            });
+        }
+    } catch(e) { document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`; }
 }
 
-function showToast(type, message) {
-    // Simple alert untuk sementara
-    alert(message);
+function exportToPDF() { alert('Fitur export PDF akan segera hadir'); }
+function exportToExcel() { alert('Fitur export Excel akan segera hadir'); }
+
+// ============ MANAJEMEN USER ============
+async function loadUsers() {
+    try {
+        const users = await LaundryAPI.getUsers();
+        currentPageData.users = users;
+        const html = `
+            <div style="margin-bottom:1rem;"><button class="btn btn-primary" onclick="showTambahUser()"><i class="fas fa-plus"></i> Tambah User</button></div>
+            <div class="glass-card"><div class="card-header"><span><i class="fas fa-user-cog"></i> Daftar User</span></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>No HP</th><th>Aksi</th></tr></thead><tbody>${users.map(u => `<tr><td><strong>${u.nama}</strong></td><td>${u.email}</td><td>${getRoleBadge(u.role)}</td><td>${u.no_hp || '-'}</td><td class="action-buttons"><button class="btn btn-sm btn-danger" onclick="hapusUser(${u.id})"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table></div></div></div>
+        `;
+        document.getElementById('pageContent').innerHTML = html;
+    } catch(e) { document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`; }
 }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.remove();
-}
+window.showTambahUser = function() {
+    const html = `<form><div class="form-group"><label class="form-label">Nama</label><input id="nama" class="form-control" required></div><div class="form-group"><label class="form-label">Email</label><input id="email" type="email" class="form-control" required></div><div class="form-group"><label class="form-label">Password</label><input id="password" type="password" class="form-control" required></div><div class="form-group"><label class="form-label">Role</label><select id="role" class="form-control"><option value="pelanggan">Pelanggan</option><option value="karyawan">Karyawan</option><option value="admin">Admin</option></select></div><div class="form-group"><label class="form-label">No HP</label><input id="no_hp" class="form-control"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="simpanUser()">Simpan</button></div></form>`;
+    openModal(html, 'Tambah User');
+    window.simpanUser = async function() {
+        const data = { nama: document.getElementById('nama').value, email: document.getElementById('email').value, password: document.getElementById('password').value, role: document.getElementById('role').value, no_hp: document.getElementById('no_hp').value };
+        const response = await fetch('http://localhost:3000/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const result = await response.json();
+        if (result.success) { closeModal('dynamicModal'); showToast('success', 'User ditambahkan'); loadPage('users'); }
+        else showToast('error', result.message);
+    };
+};
 
-// Export functions ke global scope
-window.changePage = changePage;
-window.filterPesanan = filterPesanan;
-window.filterPelanggan = filterPelanggan;
-window.showTambahPesanan = showTambahPesanan;
-window.hitungTotalPesanan = hitungTotalPesanan;
-window.simpanPesanan = simpanPesanan;
-window.closeModal = closeModal;
-window.formatRupiah = formatRupiah;
+window.hapusUser = async function(id) {
+    if (confirm('Yakin hapus user ini?')) {
+        try {
+            await LaundryAPI.deleteUser(id);
+            showToast('success', 'User dihapus');
+            loadPage('users');
+        } catch(e) { showToast('error', e.message); }
+    }
+};
+
+window.loadPage = loadPage;
