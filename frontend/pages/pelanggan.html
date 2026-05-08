@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pelanggan Dashboard - Laundry int</title>
+    <title>Pelanggan Dashboard - LaundryPro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <div class="bg-gradient"></div>
@@ -16,7 +16,7 @@
     <div class="sidebar">
         <div class="logo">
             <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
-            <h2>Laundry int</h2>
+            <h2>LaundryPro</h2>
             <p>Pelanggan Panel</p>
         </div>
         <div class="menu-item active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</div>
@@ -42,9 +42,18 @@
         <div id="pageContent"><div class="loading"><div class="spinner"></div>Memuat data...</div></div>
     </div>
 
-    <script src="../js/utils.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/pelanggan.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/pelanggan.js"></script>
+    <script>
+        setInterval(() => {
+            const now = new Date();
+            const timeEl = document.getElementById('currentTime');
+            const dateEl = document.getElementById('currentDate');
+            if (timeEl) timeEl.innerText = now.toLocaleTimeString('id-ID', { hour12: false });
+            if (dateEl) dateEl.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }, 1000);
+    </script>
 </body>
 </html>

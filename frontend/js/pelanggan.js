@@ -94,7 +94,7 @@ async function renderDashboard() {
                 <span><i class="fas fa-clock"></i> Pesanan Terbaru</span>
                 <button class="btn btn-sm btn-outline" onclick="loadPage('pesanan')">Lihat Semua</button>
             </div>
-            <div class="card-body" style="padding:0;">
+           <div class="card-body">
                 <div class="table-wrapper">
                     <table class="table">
                         <thead><tr><th>Kode</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Aksi</th></tr></thead>
@@ -263,10 +263,10 @@ async function renderPesanan() {
                                     <td>${getPaymentBadge(o.statusPembayaran)}</td>
                                     <td>${formatDate(o.tanggalPesan)}</td>
                                     <td class="action-buttons">
-                                        <button class="btn btn-sm btn-primary" onclick="showStruk(${o.id})"><i class="fas fa-file-invoice"></i> Struk</button>
-                                        ${o.status === 'selesai' && o.statusPembayaran === 'belum' ? 
-                                            `<button class="btn btn-sm btn-success" onclick="showPayment(${o.id})"><i class="fas fa-credit-card"></i> Bayar</button>` : ''}
-                                        <button class="btn btn-sm btn-outline" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button>
+                                      <button class="btn btn-sm btn-primary" onclick="showStruk(${o.id})"><i class="fas fa-file-invoice"></i> Struk</button>
+${o.statusPembayaran === 'belum' ? 
+    `<button class="btn btn-sm btn-success" onclick="showPayment(${o.id})"><i class="fas fa-credit-card"></i> Bayar</button>` : ''}
+<button class="btn btn-sm btn-outline" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button>
                                     </td>
                                 </table>
                             `).join('')}

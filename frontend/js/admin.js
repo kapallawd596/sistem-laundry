@@ -1,6 +1,7 @@
 /**
- * ADMIN DASHBOARD - Laundry int
+ * ADMIN DASHBOARD - LaundryPro
  * Fitur: Full management (pesanan, pelanggan, layanan, users, laporan)
+ * ✅ ADMIN BISA TIMBANG (input berat) seperti karyawan!
  */
 
 let currentUser = null;
@@ -101,7 +102,7 @@ async function loadDashboard() {
     }
 }
 
-// ============ MANAJEMEN PESANAN ============
+// ============ MANAJEMEN PESANAN (DENGAN FITUR TIMBANG) ============
 async function loadPesanan() {
     try {
         const pesanan = await LaundryAPI.getPesanan();
@@ -114,7 +115,7 @@ async function loadPesanan() {
                 <button class="btn btn-primary" onclick="showTambahPesanan()"><i class="fas fa-plus"></i> Tambah Pesanan</button>
             </div>
             <div class="glass-card"><div class="card-header"><span><i class="fas fa-receipt"></i> Daftar Pesanan</span></div>
-            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Pembayaran</th><th>Aksi</th></tr></thead><tbody id="pesananTableBody">${pesanan.map(p => renderPesananRow(p)).join('')}</tbody></table></div></div></div>
+            <div class="card-body" style="padding:0;"><div class="table-wrapper"><table class="table"><thead><tr><th>Kode</th><th>Pelanggan</th><th>Layanan</th><th>Berat</th><th>Total</th><th>Status</th><th>Pembayaran</th><th>Aksi</th><tr></thead><tbody id="pesananTableBody">${pesanan.map(p => renderPesananRow(p)).join('')}</tbody></table></div></div></div>
         `;
         document.getElementById('pageContent').innerHTML = html;
         window.filterPesanan = filterPesanan;
@@ -123,19 +124,21 @@ async function loadPesanan() {
     }
 }
 
+// RENDER PESANAN ROW - DENGAN TOMBOL TIMBANG UNTUK ADMIN
 function renderPesananRow(p) {
     return `
         <tr>
             <td><strong>${p.kode}</strong></td>
             <td>${p.pelangganNama}<br><small class="text-muted">${p.pelangganHp || ''}</small></td>
             <td>${p.layananNama}</td>
-            <td>${p.berat ? p.berat + ' kg' : '-'}</td>
-            <td>${formatRupiah(p.totalBayar)}</td>
+            <td>${p.berat ? p.berat + ' kg' : '<span style="color:#F59E0B;">Belum ditimbang</span>'}</td>
+            <td>${p.totalBayar ? formatRupiah(p.totalBayar) : '-'}</td>
             <td>${getStatusBadge(p.status)}</td>
             <td>${getPaymentBadge(p.statusPembayaran)}</td>
             <td class="action-buttons">
-                <button class="btn btn-sm btn-primary" onclick="editPesanan(${p.id})"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${p.id})"><i class="fas fa-trash"></i></button>
+                ${!p.berat ? `<button class="btn btn-sm btn-warning" onclick="openInputBeratAdmin(${p.id})"><i class="fas fa-weight-hanging"></i> Timbang</button>` : ''}
+                <button class="btn btn-sm btn-primary" onclick="editPesanan(${p.id})"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${p.id})"><i class="fas fa-trash"></i> Hapus</button>
             </td>
         </tr>
     `;
@@ -153,6 +156,79 @@ function filterPesanan() {
     if (tbody) tbody.innerHTML = filtered.map(p => renderPesananRow(p)).join('') || '<tr><td colspan="8" class="text-center">Tidak ada数据</td>';
 }
 
+// ============ FITUR TIMBANG UNTUK ADMIN ============
+window.openInputBeratAdmin = function(orderId) {
+    const pesanan = currentPageData.pesanan || [];
+    const order = pesanan.find(p => p.id === orderId);
+    if (!order) return;
+    
+    const html = `
+        <form id="inputBeratForm">
+            <div class="form-group">
+                <label class="form-label">Kode Pesanan</label>
+                <input type="text" class="form-control" value="${order.kode}" readonly disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pelanggan</label>
+                <input type="text" class="form-control" value="${order.pelangganNama}" readonly disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Layanan</label>
+                <input type="text" class="form-control" value="${order.layananNama} - ${formatRupiah(order.hargaPerKg)}/kg" readonly disabled>
+            </div>
+            <div class="form-group">
+                <label class="form-label required">Berat (kg)</label>
+                <input type="number" id="berat" class="form-control" step="0.1" min="0.1" placeholder="Contoh: 3.5" required>
+                <small style="color:#64748B;">Timbang pakaian di toko, lalu input beratnya</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Total Harga (Otomatis)</label>
+                <input type="text" id="totalDisplay" class="form-control" readonly disabled>
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button>
+            <button class="btn btn-primary" onclick="saveBeratAdmin(${orderId})">Simpan & Proses</button>
+        </div>
+    `;
+    
+    openModal(html, 'Input Berat Pesanan (Admin)');
+    
+    document.getElementById('berat').addEventListener('input', function() {
+        const berat = parseFloat(this.value) || 0;
+        const total = berat * order.hargaPerKg;
+        document.getElementById('totalDisplay').value = formatRupiah(total);
+    });
+};
+
+window.saveBeratAdmin = async function(orderId) {
+    const berat = parseFloat(document.getElementById('berat').value);
+    if (!berat || berat <= 0) {
+        showToast('error', 'Masukkan berat yang valid!');
+        return;
+    }
+    
+    const pesanan = currentPageData.pesanan || [];
+    const order = pesanan.find(p => p.id === orderId);
+    const totalHarga = berat * order.hargaPerKg;
+    
+    try {
+        await LaundryAPI.updatePesanan(orderId, {
+            berat: berat,
+            totalHarga: totalHarga,
+            totalBayar: totalHarga,
+            status: 'proses',
+            tanggalMasuk: new Date().toISOString().split('T')[0]
+        });
+        closeModal('dynamicModal');
+        showToast('success', `Berat ${berat} kg disimpan! Total: ${formatRupiah(totalHarga)}`);
+        loadPage('pesanan');
+    } catch(e) {
+        showToast('error', e.message);
+    }
+};
+
+// ============ CRUD PESANAN LAINNYA ============
 window.showTambahPesanan = async function() {
     const pelanggan = await LaundryAPI.getPelanggan();
     const layanan = await LaundryAPI.getLayanan();
@@ -259,7 +335,7 @@ async function loadPelanggan() {
 }
 
 function renderPelangganRow(p) {
-    return `<tr><td><strong>${p.nama}</strong></td><td>${p.email || '-'}</td><td>${p.no_hp}</td><td>${p.alamat || '-'}</td><td>${p.poin || 0}</td><td class="action-buttons"><button class="btn btn-sm btn-primary" onclick="editPelanggan(${p.id})"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+    return `<tr><td><strong>${p.nama}</strong></td><td>${p.email || '-'}</td><td>${p.no_hp}</td><td>${p.alamat || '-'}</td><td>${p.poin || 0}</td><td class="action-buttons"><button class="btn btn-sm btn-primary" onclick="editPelanggan(${p.id})"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="hapusPelanggan(${p.id})"><i class="fas fa-trash"></i></button></td></td>`;
 }
 
 function filterPelanggan() {
@@ -439,3 +515,6 @@ window.hapusUser = async function(id) {
 };
 
 window.loadPage = loadPage;
+window.closeModal = closeModal;
+window.openInputBeratAdmin = openInputBeratAdmin;
+window.saveBeratAdmin = saveBeratAdmin;
