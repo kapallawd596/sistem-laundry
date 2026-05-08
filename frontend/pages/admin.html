@@ -522,24 +522,24 @@
             } catch(e) { document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`; }
         }
 
-        function renderPesananRow(p) {
-            return `<tr><td><strong>${p.kode}</strong></td><td>${p.pelangganNama}</td><td>${p.layananNama}</td><td>${p.berat} kg</td><td>${formatRupiah(p.totalBayar)}</td><td>${getStatusBadge(p.status)}</td><td>${getPaymentBadge(p.statusPembayaran)}</td>
-            <td class="action-buttons"><button class="btn btn-sm btn-primary" onclick="editPesanan(${p.id})"><i class="fas fa-edit"></i> Edit</button>
-            <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${p.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`;
-        }
-
-        window.filterPesanan = function() {
-            const search = document.getElementById('searchPesanan')?.value.toLowerCase() || '';
-            const status = document.getElementById('statusFilter')?.value || '';
-            const filtered = (currentPageData.pesanan || []).filter(p => {
-                const matchSearch = p.kode.toLowerCase().includes(search) || p.pelangganNama.toLowerCase().includes(search);
-                const matchStatus = !status || p.status === status;
-                return matchSearch && matchStatus;
-            });
-            const tbody = document.getElementById('pesananTableBody');
-            if (tbody) tbody.innerHTML = filtered.map(p => renderPesananRow(p)).join('') || '<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>';
-        };
-
+      function renderPesananRow(p) {
+    return `
+        <tr>
+            <td><strong>${p.kode}</strong></td>
+            <td>${p.pelangganNama}<br><small class="text-muted">${p.pelangganHp || ''}</small></td>
+            <td>${p.layananNama}</td>
+            <td>${p.berat ? p.berat + ' kg' : '<span style="color:#F59E0B;">Belum ditimbang</span>'}</td>
+            <td>${p.totalBayar ? formatRupiah(p.totalBayar) : '-'}</td>
+            <td>${getStatusBadge(p.status)}</td>
+            <td>${getPaymentBadge(p.statusPembayaran)}</td>
+            <td class="action-buttons">
+                ${(!p.berat || p.berat === null) ? `<button class="btn btn-sm btn-warning" onclick="openInputBeratAdmin(${p.id})"><i class="fas fa-weight-hanging"></i> Timbang</button>` : ''}
+                <button class="btn btn-sm btn-primary" onclick="editPesanan(${p.id})"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="hapusPesanan(${p.id})"><i class="fas fa-trash"></i> Hapus</button>
+            </td>
+        </tr>
+    `;
+}
         window.showTambahPesanan = async function() {
             const pelanggan = await apiRequest('/pelanggan');
             const layanan = await apiRequest('/layanan');
@@ -818,9 +818,45 @@
                 } catch(e) { showToast('error', e.message); }
             }
         };
+// ============ FITUR TIMBANG UNTUK ADMIN ============
+window.openInputBeratAdmin = function(orderId) {
+    const pesanan = currentPageData.pesanan || [];
+    const order = pesanan.find(p => p.id === orderId);
+    if (!order) return;
+    
+    const html = `
+        <form id="inputBeratForm">
+            <div class="form-group"><label class="form-label">Kode Pesanan</label><input type="text" class="form-control" value="${order.kode}" readonly disabled></div>
+            <div class="form-group"><label class="form-label">Pelanggan</label><input type="text" class="form-control" value="${order.pelangganNama}" readonly disabled></div>
+            <div class="form-group"><label class="form-label">Layanan</label><input type="text" class="form-control" value="${order.layananNama} - ${formatRupiah(order.hargaPerKg)}/kg" readonly disabled></div>
+            <div class="form-group"><label class="form-label required">Berat (kg)</label><input type="number" id="berat" class="form-control" step="0.1" min="0.1" placeholder="Contoh: 3.5" required><small style="color:#64748B;">Timbang pakaian di toko, lalu input beratnya</small></div>
+            <div class="form-group"><label class="form-label">Total Harga (Otomatis)</label><input type="text" id="totalDisplay" class="form-control" readonly disabled></div>
+        </form>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('dynamicModal')">Batal</button><button class="btn btn-primary" onclick="saveBeratAdmin(${orderId})">Simpan & Proses</button></div>
+    `;
+    openModal(html, 'Input Berat Pesanan');
+    document.getElementById('berat').addEventListener('input', function() {
+        const berat = parseFloat(this.value) || 0;
+        const total = berat * order.hargaPerKg;
+        document.getElementById('totalDisplay').value = formatRupiah(total);
+    });
+};
 
+window.saveBeratAdmin = async function(orderId) {
+    const berat = parseFloat(document.getElementById('berat').value);
+    if (!berat || berat <= 0) { showToast('error', 'Masukkan berat yang valid!'); return; }
+    const order = currentPageData.pesanan.find(p => p.id === orderId);
+    const totalHarga = berat * order.hargaPerKg;
+    try {
+        await apiRequest(`/pesanan/${orderId}`, { method: 'PUT', body: JSON.stringify({ berat: berat, totalHarga: totalHarga, totalBayar: totalHarga, status: 'proses', tanggalMasuk: new Date().toISOString().split('T')[0] }) });
+        closeModal('dynamicModal');
+        showToast('success', `Berat ${berat} kg disimpan! Total: ${formatRupiah(totalHarga)}`);
+        loadPage('pesanan');
+    } catch(e) { showToast('error', e.message); }
+};
         window.loadPage = loadPage;
         window.closeModal = closeModal;
     </script>
 </body>
 </html>
+

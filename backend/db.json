@@ -288,9 +288,73 @@
       "catatan": "",
       "karyawanId": null,
       "createdAt": "2026-05-08T13:55:38.643Z"
+    },
+    {
+      "id": 8,
+      "kode": "LDY202605083565",
+      "pelangganId": 4,
+      "pelangganNama": "entis",
+      "pelangganHp": "081515116241",
+      "layananId": 2,
+      "layananNama": "Cuci Kering",
+      "berat": null,
+      "hargaPerKg": 5000,
+      "totalHarga": null,
+      "diskon": 5,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-05-08",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-05-08T14:12:03.762Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 34,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:46:09.759Z"
+    },
+    {
+      "id": 33,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:41:39.751Z"
+    },
+    {
+      "id": 32,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:22:39.383Z"
+    },
+    {
+      "id": 31,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:18:35.585Z"
+    },
+    {
+      "id": 30,
+      "deskripsi": "Pesanan baru: LDY202605083565 dari entis",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:12:03.766Z"
+    },
+    {
+      "id": 29,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:11:22.764Z"
+    },
+    {
+      "id": 28,
+      "deskripsi": "User entis (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:10:55.017Z"
+    },
     {
       "id": 27,
       "deskripsi": "User Admin Utama (admin) login",
