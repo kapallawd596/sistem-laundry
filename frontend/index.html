@@ -96,6 +96,7 @@
             width: 100%;
             top: 42px;
             background: rgba(10, 14, 26, 0.95);
+            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(59, 130, 246, 0.3);
             z-index: 1000;
@@ -334,6 +335,7 @@
 
         .feature-card, .pricing-card, .testimonial-card {
             background: rgba(15, 23, 42, 0.6);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 2rem;
@@ -391,6 +393,7 @@
 
         .stat-item {
             background: rgba(15, 23, 42, 0.6);
+            -webkit-backdrop-filter: blur(10px);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 1.5rem;
@@ -506,6 +509,12 @@
         .btn-cta:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Pricing Button Styles */
+        .pricing-card .btn-secondary {
+            background: #334155;
+            box-shadow: none;
         }
 
         /* Footer */
@@ -656,9 +665,9 @@
     <section id="pricing">
         <h2 class="section-title">Pilihan <span>Layanan Laundry</span></h2>
         <div class="pricing-grid">
-            <div class="pricing-card"><h3>Cuci Kering</h3><div class="price">Rp 5K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci bersih</li><li><i class="fas fa-check"></i> Wangi tahan lama</li><li><i class="fas fa-check"></i> Lipat rapi</li><li><i class="fas fa-check"></i> Selesai 1x24 jam</li></ul><a href="register.html" class="btn-primary" style="background:#334155; box-shadow:none;">Pilih Paket</a></div>
+            <div class="pricing-card"><h3>Cuci Kering</h3><div class="price">Rp 5K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci bersih</li><li><i class="fas fa-check"></i> Wangi tahan lama</li><li><i class="fas fa-check"></i> Lipat rapi</li><li><i class="fas fa-check"></i> Selesai 1x24 jam</li></ul><a href="register.html" class="btn-primary btn-secondary">Pilih Paket</a></div>
             <div class="pricing-card popular"><div class="popular-badge">⭐ Paling Laris</div><h3>Cuci Setrika</h3><div class="price">Rp 7K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci bersih</li><li><i class="fas fa-check"></i> Setrika rapi</li><li><i class="fas fa-check"></i> Wangi tahan lama</li><li><i class="fas fa-check"></i> Selesai 1x24 jam</li></ul><a href="register.html" class="btn-primary">Pilih Paket</a></div>
-            <div class="pricing-card"><h3>Express 3 Jam</h3><div class="price">Rp 15K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci kilat</li><li><i class="fas fa-check"></i> Setrika rapi</li><li><i class="fas fa-check"></i> Selesai 3 jam</li><li><i class="fas fa-check"></i> Prioritas</li></ul><a href="register.html" class="btn-primary" style="background:#334155; box-shadow:none;">Pilih Paket</a></div>
+            <div class="pricing-card"><h3>Express 3 Jam</h3><div class="price">Rp 15K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci kilat</li><li><i class="fas fa-check"></i> Setrika rapi</li><li><i class="fas fa-check"></i> Selesai 3 jam</li><li><i class="fas fa-check"></i> Prioritas</li></ul><a href="register.html" class="btn-primary btn-secondary">Pilih Paket</a></div>
         </div>
     </section>
 
@@ -679,10 +688,10 @@
 
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section"><h4>Laundry int</h4><p>Solusi laundry modern dengan sistem digital. Mudah, cepat, dan terpercaya.</p><div class="social-links"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-whatsapp"></i></a></div></div>
+            <div class="footer-section"><h4>Laundry int</h4><p>Solusi laundry modern dengan sistem digital. Mudah, cepat, dan terpercaya.</p><div class="social-links"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a><a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a></div></div>
             <div class="footer-section"><h4>Layanan</h4><a href="#">Cuci Setrika</a><a href="#">Cuci Kering</a><a href="#">Setrika Saja</a><a href="#">Dry Cleaning</a><a href="#">Express 3 Jam</a></div>
             <div class="footer-section"><h4>Informasi</h4><a href="#">Tentang Kami</a><a href="#">Kebijakan Privasi</a><a href="#">Syarat & Ketentuan</a><a href="#">FAQ</a></div>
-            <div class="footer-section"><h4>Kontak</h4><p><i class="fas fa-phone"></i> (021) 1234 5678</p><p><i class="fab fa-whatsapp"></i> 0812-3456-7890</p><p><i class="fas fa-envelope"></i> info@laundry int.com</p><p><i class="fas fa-map-marker-alt"></i> Jl. Laundry No. 123, Jakarta</p></div>
+            <div class="footer-section"><h4>Kontak</h4><p><i class="fas fa-phone"></i> (021) 1234 5678</p><p><i class="fab fa-whatsapp"></i> 0812-3456-7890</p><p><i class="fas fa-envelope"></i> info@laundryint.com</p><p><i class="fas fa-map-marker-alt"></i> Jl. Laundry No. 123, Jakarta</p></div>
         </div>
         <div class="footer-bottom"><p>&copy; 2025 Laundry int. All rights reserved. | Premium Laundry Service</p></div>
     </footer>
