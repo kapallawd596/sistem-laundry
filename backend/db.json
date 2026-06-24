@@ -39,6 +39,16 @@
       "no_hp": "081515116241",
       "alamat": "",
       "createdAt": "2026-05-07T12:37:18.776Z"
+    },
+    {
+      "id": 5,
+      "nama": "jancuk",
+      "email": "jancuk@gmail.com",
+      "password": "jancuk123",
+      "role": "pelanggan",
+      "no_hp": "081224049769",
+      "alamat": "",
+      "createdAt": "2026-05-08T14:52:47.334Z"
     }
   ],
   "pelanggan": [
@@ -81,6 +91,16 @@
       "poin": 0,
       "totalTransaksi": 0,
       "createdAt": "2026-05-07T12:37:18.776Z"
+    },
+    {
+      "id": 5,
+      "nama": "jancuk",
+      "email": "jancuk@gmail.com",
+      "no_hp": "081224049769",
+      "alamat": "",
+      "poin": 0,
+      "totalTransaksi": 0,
+      "createdAt": "2026-05-08T14:52:47.334Z"
     }
   ],
   "layanan": [
@@ -310,9 +330,57 @@
       "catatan": "",
       "karyawanId": null,
       "createdAt": "2026-05-08T14:12:03.762Z"
+    },
+    {
+      "id": 9,
+      "kode": "LDY202605085380",
+      "pelangganId": 5,
+      "pelangganNama": "jancuk",
+      "pelangganHp": "081224049769",
+      "pelangganAlamat": "",
+      "layananId": 6,
+      "layananNama": "cuci helem",
+      "berat": null,
+      "hargaPerKg": 4000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-05-08",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-05-09 08:00 - 10:00",
+      "catatan": "anj",
+      "karyawanId": null,
+      "createdAt": "2026-05-08T14:56:10.026Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 38,
+      "deskripsi": "User jancuk (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-05-10T07:33:57.617Z"
+    },
+    {
+      "id": 37,
+      "deskripsi": "Pesanan baru: LDY202605085380 dari jancuk",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:56:10.027Z"
+    },
+    {
+      "id": 36,
+      "deskripsi": "User jancuk (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:52:54.072Z"
+    },
+    {
+      "id": 35,
+      "deskripsi": "User baru terdaftar: jancuk@gmail.com",
+      "tipe": "success",
+      "createdAt": "2026-05-08T14:52:47.335Z"
+    },
     {
       "id": 34,
       "deskripsi": "User Admin Utama (admin) login",
