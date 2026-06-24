@@ -354,9 +354,41 @@
       "catatan": "anj",
       "karyawanId": null,
       "createdAt": "2026-05-08T14:56:10.026Z"
+    },
+    {
+      "id": 10,
+      "kode": "LDY202606241850",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-24",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-26 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-24T03:20:36.913Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 40,
+      "deskripsi": "Pesanan baru: LDY202606241850 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:20:36.916Z"
+    },
+    {
+      "id": 39,
+      "deskripsi": "User Pelanggan Setia (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:19:27.619Z"
+    },
     {
       "id": 38,
       "deskripsi": "User jancuk (pelanggan) login",
