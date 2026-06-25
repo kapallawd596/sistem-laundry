@@ -151,27 +151,6 @@
   ],
   "pesanan": [
     {
-      "id": 1,
-      "kode": "LDY2025001",
-      "pelangganId": 1,
-      "pelangganNama": "Budi Santoso",
-      "pelangganHp": "081234567893",
-      "layananId": 1,
-      "layananNama": "Cuci Setrika",
-      "berat": 3.5,
-      "hargaPerKg": 7000,
-      "totalHarga": 24500,
-      "diskon": 0,
-      "totalBayar": 24500,
-      "status": "selesai",
-      "statusPembayaran": "lunas",
-      "tanggalMasuk": "2025-01-15",
-      "tanggalSelesai": "2025-01-16",
-      "catatan": "Pakaian rapikan",
-      "operatorId": 2,
-      "createdAt": "2025-01-15T08:00:00.000Z"
-    },
-    {
       "id": 2,
       "kode": "LDY2025002",
       "pelangganId": 2,
@@ -374,9 +353,49 @@
       "catatan": "",
       "karyawanId": null,
       "createdAt": "2026-06-24T03:20:36.913Z"
+    },
+    {
+      "id": 11,
+      "kode": "LDY202606253251",
+      "pelangganId": 3,
+      "pelangganNama": "Rudi Hartono",
+      "pelangganHp": "081234567895",
+      "layananId": 2,
+      "layananNama": "Cuci Kering",
+      "berat": null,
+      "hargaPerKg": 5000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T01:46:13.966Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 43,
+      "deskripsi": "Pesanan baru: LDY202606253251 dari Rudi Hartono",
+      "tipe": "success",
+      "createdAt": "2026-06-25T01:46:13.969Z"
+    },
+    {
+      "id": 42,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T00:54:09.486Z"
+    },
+    {
+      "id": 41,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T00:50:32.492Z"
+    },
     {
       "id": 40,
       "deskripsi": "Pesanan baru: LDY202606241850 dari undefined",
