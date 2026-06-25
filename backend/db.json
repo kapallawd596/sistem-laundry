@@ -22,7 +22,7 @@
     },
     {
       "id": 3,
-      "nama": "Pelanggan Setia",
+      "nama": "Pelanggan Setiadd",
       "email": "pelanggan@example.com",
       "password": "user123",
       "role": "pelanggan",
@@ -101,6 +101,16 @@
       "poin": 0,
       "totalTransaksi": 0,
       "createdAt": "2026-05-08T14:52:47.334Z"
+    },
+    {
+      "id": 6,
+      "nama": "aji",
+      "email": "admin@ld.com",
+      "no_hp": "3232355",
+      "alamat": "qdqd",
+      "poin": 0,
+      "totalTransaksi": 0,
+      "createdAt": "2026-06-25T01:56:18.786Z"
     }
   ],
   "layanan": [
@@ -375,9 +385,241 @@
       "catatan": "",
       "karyawanId": null,
       "createdAt": "2026-06-25T01:46:13.966Z"
+    },
+    {
+      "id": 12,
+      "kode": "LDY202606254263",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-12-31 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T01:58:37.417Z"
+    },
+    {
+      "id": 13,
+      "kode": "LDY202606252957",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-26 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:05:28.730Z"
+    },
+    {
+      "id": 14,
+      "kode": "LDY202606259192",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-27 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:12:34.809Z"
+    },
+    {
+      "id": 15,
+      "kode": "LDY202606258020",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-27 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:13:37.048Z"
+    },
+    {
+      "id": 16,
+      "kode": "LDY202606255723",
+      "layananId": 2,
+      "layananNama": "Cuci Kering",
+      "berat": null,
+      "hargaPerKg": 5000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-27 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:18:15.349Z"
+    },
+    {
+      "id": 17,
+      "kode": "LDY202606250447",
+      "layananId": 1,
+      "layananNama": "Test",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-26 08:00 - 10:00",
+      "catatan": "test",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:18:49.956Z"
+    },
+    {
+      "id": 18,
+      "kode": "LDY202606259185",
+      "layananId": 2,
+      "layananNama": "Cuci Kering",
+      "berat": null,
+      "hargaPerKg": 5000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-27 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:27:38.211Z"
+    },
+    {
+      "id": 19,
+      "kode": "LDY202606250551",
+      "layananId": 4,
+      "layananNama": "Dry Cleaning",
+      "berat": null,
+      "hargaPerKg": 25000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-25",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-27 08:00 - 10:00",
+      "catatan": "dd",
+      "karyawanId": null,
+      "createdAt": "2026-06-25T02:28:34.887Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 55,
+      "deskripsi": "Pesanan baru: LDY202606250551 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:28:34.889Z"
+    },
+    {
+      "id": 54,
+      "deskripsi": "Pesanan baru: LDY202606259185 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:27:38.213Z"
+    },
+    {
+      "id": 53,
+      "deskripsi": "Pesanan baru: LDY202606250447 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:18:49.958Z"
+    },
+    {
+      "id": 52,
+      "deskripsi": "Pesanan baru: LDY202606255723 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:18:15.352Z"
+    },
+    {
+      "id": 51,
+      "deskripsi": "Pesanan baru: LDY202606258020 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:13:37.050Z"
+    },
+    {
+      "id": 50,
+      "deskripsi": "Pesanan baru: LDY202606259192 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:12:34.811Z"
+    },
+    {
+      "id": 49,
+      "deskripsi": "Pesanan baru: LDY202606252957 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:05:28.733Z"
+    },
+    {
+      "id": 48,
+      "deskripsi": "User Pelanggan Setia (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:03:05.106Z"
+    },
+    {
+      "id": 47,
+      "deskripsi": "Pesanan baru: LDY202606254263 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-25T01:58:37.419Z"
+    },
+    {
+      "id": 46,
+      "deskripsi": "User Pelanggan Setia (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T01:57:50.522Z"
+    },
+    {
+      "id": 45,
+      "deskripsi": "User Karyawan Laundry (karyawan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T01:57:02.553Z"
+    },
+    {
+      "id": 44,
+      "deskripsi": "Pelanggan baru: aji ditambahkan",
+      "tipe": "success",
+      "createdAt": "2026-06-25T01:56:18.789Z"
+    },
     {
       "id": 43,
       "deskripsi": "Pesanan baru: LDY202606253251 dari Rudi Hartono",
@@ -605,36 +847,6 @@
       "deskripsi": "User entis (pelanggan) login",
       "tipe": "success",
       "createdAt": "2026-05-08T13:13:04.181Z"
-    },
-    {
-      "id": 5,
-      "deskripsi": "User entis (pelanggan) login",
-      "tipe": "success",
-      "createdAt": "2026-05-07T12:37:25.910Z"
-    },
-    {
-      "id": 4,
-      "deskripsi": "User baru terdaftar: sutisna@gmail.com",
-      "tipe": "success",
-      "createdAt": "2026-05-07T12:37:18.778Z"
-    },
-    {
-      "id": 1,
-      "deskripsi": "Sistem Laundry int Aktif",
-      "tipe": "info",
-      "createdAt": "2025-01-21T00:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "deskripsi": "Pesanan baru: LDY2025003 dari Rudi Hartono",
-      "tipe": "success",
-      "createdAt": "2025-01-21T09:00:00.000Z"
-    },
-    {
-      "id": 3,
-      "deskripsi": "Pembayaran lunas untuk pesanan LDY2025001",
-      "tipe": "success",
-      "createdAt": "2025-01-16T14:00:00.000Z"
     }
   ]
 }
