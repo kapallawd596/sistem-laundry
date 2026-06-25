@@ -549,6 +549,12 @@
   ],
   "aktivitas": [
     {
+      "id": 56,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-06-25T02:34:33.470Z"
+    },
+    {
       "id": 55,
       "deskripsi": "Pesanan baru: LDY202606250551 dari undefined",
       "tipe": "success",
@@ -841,12 +847,6 @@
       "deskripsi": "Pesanan baru: LDY202605083440 dari entis",
       "tipe": "success",
       "createdAt": "2026-05-08T13:16:39.322Z"
-    },
-    {
-      "id": 6,
-      "deskripsi": "User entis (pelanggan) login",
-      "tipe": "success",
-      "createdAt": "2026-05-08T13:13:04.181Z"
     }
   ]
 }
