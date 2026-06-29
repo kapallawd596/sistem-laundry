@@ -545,9 +545,41 @@
       "catatan": "dd",
       "karyawanId": null,
       "createdAt": "2026-06-25T02:28:34.887Z"
+    },
+    {
+      "id": 20,
+      "kode": "LDY202606295961",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-29",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-30 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-29T06:57:32.474Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 58,
+      "deskripsi": "Pesanan baru: LDY202606295961 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-29T06:57:32.476Z"
+    },
+    {
+      "id": 57,
+      "deskripsi": "User Pelanggan Setiadd (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-29T06:56:49.845Z"
+    },
     {
       "id": 56,
       "deskripsi": "User Admin Utama (admin) login",
@@ -835,18 +867,6 @@
       "deskripsi": "User entis (pelanggan) login",
       "tipe": "success",
       "createdAt": "2026-05-08T13:23:15.291Z"
-    },
-    {
-      "id": 8,
-      "deskripsi": "Pesanan baru: LDY202605089187 dari entis",
-      "tipe": "success",
-      "createdAt": "2026-05-08T13:17:11.216Z"
-    },
-    {
-      "id": 7,
-      "deskripsi": "Pesanan baru: LDY202605083440 dari entis",
-      "tipe": "success",
-      "createdAt": "2026-05-08T13:16:39.322Z"
     }
   ]
 }
