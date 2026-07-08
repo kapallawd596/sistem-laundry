@@ -831,3 +831,530 @@ textarea.form-control {
 .cursor-pointer {
     cursor: pointer;
 }
+
+/* ========== RESPONSIVE SIDEBAR UNTUK HP ========== */
+
+/* Hamburger Menu Button (untuk mobile) */
+.mobile-menu-btn {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+    border: none;
+    border-radius: 12px;
+    width: 45px;
+    height: 45px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(59,130,246,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay untuk mobile saat sidebar terbuka */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 99;
+}
+
+/* Sidebar - default untuk desktop */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(59, 130, 246, 0.3);
+    z-index: 100;
+    transition: all 0.3s ease;
+    overflow-y: auto;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 280px;
+    padding: 25px 35px;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+/* ========== RESPONSIVE BREAKPOINTS ========== */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 280px;
+        padding: 20px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: flex;
+    }
+    
+    /* Sidebar hidden by default on mobile */
+    .sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+        z-index: 1000;
+    }
+    
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 70px 15px 15px 15px;
+    }
+    
+    /* Top bar adjustment for mobile */
+    .top-bar {
+        flex-direction: column;
+        text-align: center;
+        padding: 12px 15px;
+        gap: 10px;
+    }
+    
+    .datetime {
+        padding: 5px 12px;
+    }
+    
+    .time {
+        font-size: 1rem;
+    }
+    
+    .page-title {
+        font-size: 1rem;
+    }
+    
+    .user-info {
+        padding: 5px 15px;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    /* Table responsive */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 600px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        font-size: 11px;
+    }
+    
+    /* Button group */
+    .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    /* Search filter */
+    .search-filter {
+        flex-direction: column;
+    }
+    
+    .search-filter input, 
+    .search-filter select {
+        width: 100%;
+    }
+    
+    /* Modal */
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    /* Tracking steps */
+    .tracking-steps {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .tracking-line {
+        display: none;
+    }
+    
+    /* Payment grid */
+    .payment-grid {
+        flex-direction: column;
+    }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 60px 12px 12px 12px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* ========== SETTINGS PAGE STYLES ========== */
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.settings-header {
+    padding: 18px 25px;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+    font-weight: 600;
+    color: white;
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.settings-body {
+    padding: 20px 25px;
+}
+
+.profile-image {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+
+/* Password strength indicator */
+.password-strength {
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+
+.strength-weak { background: #EF4444; width: 33%; }
+.strength-medium { background: #F59E0B; width: 66%; }
+.strength-strong { background: #10B981; width: 100%; }
+
+/* Two-factor toggle */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #334155;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Settings Styles */
+.settings-section { margin-bottom: 30px; }
+.settings-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.settings-header {
+    padding: 18px 25px;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+    font-weight: 600;
+    color: white;
+    background: rgba(15, 23, 42, 0.5);
+}
+.settings-body { padding: 20px 25px; }
+.profile-image {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 0 20px rgba(59,130,246,0.3);
+}
+.password-strength {
+    height: 4px;
+    margin-top: 8px;
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+.strength-weak { background: #EF4444; width: 33%; }
+.strength-medium { background: #F59E0B; width: 66%; }
+.strength-strong { background: #10B981; width: 100%; }
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #334155;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #3B82F6, #06B6D4);
+}
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* =====================================================
+   STYLE.CSS — RESPONSIVE PATCHES (Appended)
+   Menambah perbaikan tanpa konflik dengan responsive.css
+   ===================================================== */
+
+/* Fix: sidebar z-index dan transition */
+.sidebar {
+    z-index: 1000;
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1), width 0.3s ease;
+}
+
+/* Fix: .main-content transition */
+.main-content {
+    transition: margin-left 0.35s cubic-bezier(.4,0,.2,1);
+}
+
+/* Fix: tombol minimal height untuk touchable */
+@media (max-width: 768px) {
+    .btn:not(.btn-sm) {
+        min-height: 44px;
+    }
+    .btn-sm {
+        min-height: 36px;
+    }
+
+    /* Fix: top-bar hilang di mobile (mobile-header yang dipakai) */
+    .top-bar {
+        display: none;
+    }
+
+    /* Fix: main-content padding bottom untuk bottom nav */
+    .main-content {
+        margin-left: 0 !important;
+        padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 16px);
+    }
+
+    /* Fix: card header wrap */
+    .card-header {
+        flex-wrap: wrap;
+    }
+
+    /* Fix: search filter stack */
+    .search-filter {
+        flex-direction: column;
+    }
+    .search-filter input,
+    .search-filter select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Fix: payment method grid */
+    .payment-methods {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Fix: struk container */
+    .struk-container {
+        padding: 14px !important;
+    }
+    .struk-row {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* Fix: stat card padding */
+    .stat-card {
+        padding: 14px 16px !important;
+    }
+
+    /* Fix: modal */
+    .modal {
+        align-items: flex-end !important;
+        padding: 0 !important;
+    }
+    .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+        max-height: 92vh !important;
+    }
+    .modal-header {
+        border-radius: 24px 24px 0 0 !important;
+    }
+
+    /* Fix: tracking step vertikal */
+    .tracking-steps {
+        flex-direction: column;
+        gap: 14px;
+    }
+    .tracking-line {
+        display: none;
+    }
+
+    /* Fix: form row grid jadi 1 kolom */
+    .form-row {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Fix: overflow-x global */
+body, html {
+    overflow-x: hidden;
+}
+
+/* Fix: images responsive */
+.main-content img:not(.logo-icon img):not(.user-avatar img) {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fix: table tidak overflow parent */
+.table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fix: badge tidak wrap aneh */
+.badge {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Fix: bottom nav safe area */
+.bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
