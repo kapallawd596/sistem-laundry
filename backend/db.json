@@ -49,6 +49,16 @@
       "no_hp": "081224049769",
       "alamat": "",
       "createdAt": "2026-05-08T14:52:47.334Z"
+    },
+    {
+      "id": 6,
+      "nama": "Nur wahyu nandarudin",
+      "email": "entis@gmail.com",
+      "password": "entis123",
+      "role": "pelanggan",
+      "no_hp": "081515116241",
+      "alamat": "",
+      "createdAt": "2026-06-24T03:08:55.862Z"
     }
   ],
   "pelanggan": [
@@ -101,6 +111,16 @@
       "poin": 0,
       "totalTransaksi": 0,
       "createdAt": "2026-05-08T14:52:47.334Z"
+    },
+    {
+      "id": 6,
+      "nama": "Nur wahyu nandarudin",
+      "email": "entis@gmail.com",
+      "no_hp": "081515116241",
+      "alamat": "",
+      "poin": 0,
+      "totalTransaksi": 0,
+      "createdAt": "2026-06-24T03:08:55.862Z"
     }
   ],
   "layanan": [
@@ -354,9 +374,89 @@
       "catatan": "anj",
       "karyawanId": null,
       "createdAt": "2026-05-08T14:56:10.026Z"
+    },
+    {
+      "id": 10,
+      "kode": "LDY202606245086",
+      "layananId": 1,
+      "layananNama": "Cuci Setrika",
+      "berat": null,
+      "hargaPerKg": 7000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-24",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-26 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-24T03:08:24.775Z"
+    },
+    {
+      "id": 11,
+      "kode": "LDY202606244253",
+      "pelangganId": 6,
+      "pelangganNama": "Nur wahyu nandarudin",
+      "pelangganHp": "081515116241",
+      "pelangganAlamat": "",
+      "layananId": 6,
+      "layananNama": "cuci helem",
+      "berat": null,
+      "hargaPerKg": 4000,
+      "totalHarga": null,
+      "diskon": 0,
+      "totalBayar": null,
+      "status": "menunggu",
+      "statusPembayaran": "belum",
+      "tanggalPesan": "2026-06-24",
+      "tanggalMasuk": null,
+      "tanggalSelesai": null,
+      "jadwalJemput": "2026-06-26 08:00 - 10:00",
+      "catatan": "",
+      "karyawanId": null,
+      "createdAt": "2026-06-24T03:09:30.146Z"
     }
   ],
   "aktivitas": [
+    {
+      "id": 44,
+      "deskripsi": "Pesanan baru: LDY202606244253 dari Nur wahyu nandarudin",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:09:30.148Z"
+    },
+    {
+      "id": 43,
+      "deskripsi": "User Nur wahyu nandarudin (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:09:12.744Z"
+    },
+    {
+      "id": 42,
+      "deskripsi": "User baru terdaftar: entis@gmail.com",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:08:55.864Z"
+    },
+    {
+      "id": 41,
+      "deskripsi": "Pesanan baru: LDY202606245086 dari undefined",
+      "tipe": "success",
+      "createdAt": "2026-06-24T03:08:24.787Z"
+    },
+    {
+      "id": 40,
+      "deskripsi": "User Pelanggan Setia (pelanggan) login",
+      "tipe": "success",
+      "createdAt": "2026-06-24T02:57:52.116Z"
+    },
+    {
+      "id": 39,
+      "deskripsi": "User Admin Utama (admin) login",
+      "tipe": "success",
+      "createdAt": "2026-06-24T02:57:13.281Z"
+    },
     {
       "id": 38,
       "deskripsi": "User jancuk (pelanggan) login",
