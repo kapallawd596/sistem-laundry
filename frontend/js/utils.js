@@ -158,6 +158,85 @@ function updateDateTime() {
     }
 }
 
+// ============ PASSWORD STRENGTH ============
+function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 10) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    if (strength <= 2) return { level: 'weak', text: 'Lemah', class: 'strength-weak' };
+    if (strength <= 4) return { level: 'medium', text: 'Sedang', class: 'strength-medium' };
+    return { level: 'strong', text: 'Kuat', class: 'strength-strong' };
+}
+
+// ============ LUPA PASSWORD ============
+async function requestResetPassword(email) {
+    try {
+        const response = await fetch('https://laundry-backend-api.vercel.app/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        return await response.json();
+    } catch (error) {
+        return { success: false, message: error.message };
+    }
+}
+
+async function resetPassword(token, newPassword) {
+    try {
+        const response = await fetch('https://laundry-backend-api.vercel.app/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, newPassword })
+        });
+        return await response.json();
+    } catch (error) {
+        return { success: false, message: error.message };
+    }
+}
+
+// ============ SIDEBAR TOGGLE UNTUK HP ============
+function initMobileSidebar() {
+    // Tambahkan tombol hamburger menu jika belum ada
+    if (!document.querySelector('.mobile-menu-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'mobile-menu-btn';
+        btn.innerHTML = '<i class="fas fa-bars"></i>';
+        btn.onclick = toggleSidebar;
+        document.body.appendChild(btn);
+    }
+    
+    // Tambahkan overlay jika belum ada
+    if (!document.querySelector('.sidebar-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.onclick = closeSidebar;
+        document.body.appendChild(overlay);
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        if (overlay) overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        if (overlay) overlay.style.display = 'none';
+    }
+}
+
 // Export ke window
 window.formatRupiah = formatRupiah;
 window.formatNumber = formatNumber;
@@ -174,3 +253,9 @@ window.closeModal = closeModal;
 window.openModal = openModal;
 window.createParticles = createParticles;
 window.updateDateTime = updateDateTime;
+window.checkPasswordStrength = checkPasswordStrength;
+window.requestResetPassword = requestResetPassword;
+window.resetPassword = resetPassword;
+window.initMobileSidebar = initMobileSidebar;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
