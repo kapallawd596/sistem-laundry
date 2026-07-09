@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Laundry int - Solusi Laundry Modern</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
@@ -16,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated Gradient Background */
         .bg-gradient {
             position: fixed;
             top: 0;
@@ -37,7 +36,6 @@
             pointer-events: none;
         }
 
-        /* Floating Particles */
         .particles {
             position: fixed;
             top: 0;
@@ -63,7 +61,7 @@
             100% { transform: translateY(-100vh) scale(1); opacity: 0; }
         }
 
-        /* Running Text */
+        /* ===== RUNNING TEXT ===== */
         .running-text {
             position: fixed;
             top: 0;
@@ -71,253 +69,314 @@
             width: 100%;
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             color: white;
-            padding: 10px 0;
+            padding: 6px 0;
             overflow: hidden;
             white-space: nowrap;
             z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             font-weight: 500;
-            letter-spacing: 1px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
         }
         .running-text span {
             display: inline-block;
-            animation: marquee 25s linear infinite;
+            animation: marquee 30s linear infinite;
         }
         @keyframes marquee {
             0% { transform: translateX(100%); }
             100% { transform: translateX(-100%); }
         }
-        .running-text i { margin: 0 15px; color: #ffd700; }
-        .running-text .highlight { color: #ffd700; font-weight: bold; }
+        .running-text i { margin: 0 10px; color: #ffd700; }
+        .running-text .highlight { color: #ffd700; font-weight: 700; }
 
-        /* Navbar - turun karena running text */
-        .navbar {
+        /* ===== HEADER ===== */
+        .header {
             position: fixed;
             width: 100%;
-            top: 42px;
-            background: rgba(10, 14, 26, 0.95);
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            top: 28px;
+            background: rgba(10, 14, 26, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.08);
             z-index: 1000;
+            padding: 8px 0;
+            transition: all 0.3s ease;
         }
 
-        .nav-container {
+        .header.scrolled {
+            background: rgba(10, 14, 26, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-inner {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: 0 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 8px;
         }
 
+        /* Logo */
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 8px;
+            text-decoration: none;
+            flex-shrink: 0;
         }
-
         .logo-icon {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #3b82f6, #06b6d4);
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(145deg, #3b82f6, #06b6d4);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 16px;
             color: white;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
         }
-
-        .logo h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .logo-text h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
             color: white;
+            line-height: 1.1;
         }
-
-        .logo p {
-            font-size: 0.65rem;
+        .logo-text h1 span {
+            background: linear-gradient(135deg, #60a5fa, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo-text p {
+            font-size: 0.45rem;
             color: #94a3b8;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
 
-        /* JAM BESAR */
-        .datetime {
+        /* ===== JAM DIGITAL + TANGGAL - TETAP TAMPIL DI SEMUA UKURAN ===== */
+        .header-datetime {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(59, 130, 246, 0.15);
-            padding: 8px 20px;
-            border-radius: 40px;
-            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: rgba(59, 130, 246, 0.08);
+            padding: 3px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            flex-shrink: 0;
+            min-width: 100px;
         }
-        .time {
-            font-size: 1.6rem;
+        .header-time {
+            font-size: 1rem;
             font-weight: 700;
             color: #60a5fa;
-            font-family: monospace;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(59,130,246,0.8);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            line-height: 1.2;
         }
-        .date {
-            font-size: 0.7rem;
+        .header-time .blink {
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .header-date {
+            font-size: 0.5rem;
             color: #94a3b8;
-            margin-top: 2px;
+            margin-top: 1px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
+        /* ===== NAVIGASI ===== */
         .nav-links {
             display: flex;
-            gap: 1.5rem;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 14px;
+            flex-shrink: 0;
         }
-
         .nav-links a {
             text-decoration: none;
-            color: #cbd5e1;
+            color: #94a3b8;
             font-weight: 500;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 4px 0;
+            white-space: nowrap;
         }
-
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
         .nav-links a:hover {
-            color: #60a5fa;
+            color: #f8fafc;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .nav-links a.active {
+            color: #f8fafc;
+        }
+        .nav-links a.active::after {
+            width: 100%;
         }
 
         .btn-login {
             background: transparent;
-            border: 1px solid #3b82f6;
+            border: 1.5px solid rgba(59, 130, 246, 0.35);
             color: #60a5fa !important;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            transition: all 0.3s;
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-
         .btn-login:hover {
-            background: #3b82f6;
+            background: rgba(59, 130, 246, 0.12);
+            border-color: #3b82f6;
             color: white !important;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
         }
 
         .btn-register {
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             color: white !important;
-            padding: 0.5rem 1.5rem;
-            border-radius: 40px;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            padding: 5px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
         }
-
         .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
         }
 
-        /* Hero Section */
+        .mobile-toggle {
+            display: none;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .mobile-toggle:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        /* ===== HERO ===== */
         .hero {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 10rem 2rem 4rem;
+            padding: 110px 20px 50px;
             position: relative;
         }
-
         .hero-content {
-            max-width: 900px;
+            max-width: 820px;
             z-index: 2;
         }
-
         .hero-badge {
             display: inline-block;
-            background: rgba(59, 130, 246, 0.15);
-            padding: 0.3rem 1rem;
+            background: rgba(59, 130, 246, 0.12);
+            padding: 4px 16px;
             border-radius: 50px;
-            font-size: 0.8rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-size: 0.7rem;
+            margin-bottom: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
             color: #60a5fa;
         }
-
         .hero h1 {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin-bottom: 1rem;
-            line-height: 1.2;
+            margin-bottom: 14px;
+            line-height: 1.15;
         }
-
         .hero h1 span {
             background: linear-gradient(135deg, #60a5fa, #06b6d4);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-
         .hero p {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: #94a3b8;
-            margin-bottom: 2rem;
+            margin-bottom: 28px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
         }
-
         .hero-buttons {
             display: flex;
-            gap: 1rem;
+            gap: 14px;
             justify-content: center;
             flex-wrap: wrap;
         }
-
         .btn-primary {
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             color: white;
-            padding: 0.8rem 2rem;
+            padding: 12px 32px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            gap: 8px;
+            box-shadow: 0 4px 25px rgba(59, 130, 246, 0.35);
         }
-
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.5);
         }
-
         .btn-outline {
-            border: 1px solid #3b82f6;
+            border: 1.5px solid rgba(59, 130, 246, 0.4);
             background: transparent;
             color: #60a5fa;
-            padding: 0.8rem 2rem;
+            padding: 12px 32px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
-
         .btn-outline:hover {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(59, 130, 246, 0.08);
             border-color: #60a5fa;
+            transform: translateY(-4px);
         }
 
-        /* Sections */
-        section {
-            padding: 5rem 2rem;
-        }
-
+        /* ===== SECTIONS ===== */
+        section { padding: 50px 20px; }
         .section-title {
             text-align: center;
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 3rem;
+            margin-bottom: 32px;
         }
-
         .section-title span {
             background: linear-gradient(135deg, #60a5fa, #06b6d4);
             -webkit-background-clip: text;
@@ -325,277 +384,533 @@
             color: transparent;
         }
 
-        .features-grid, .pricing-grid, .testimonials-grid {
+        .features-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
-
-        .feature-card, .pricing-card, .testimonial-card {
-            background: rgba(15, 23, 42, 0.6);
-            -webkit-backdrop-filter: blur(10px);
+        .feature-card {
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 28px 20px;
             text-align: center;
-            transition: all 0.4s;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(59, 130, 246, 0.08);
         }
-
-        .feature-card:hover, .pricing-card:hover, .testimonial-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
         }
-
         .feature-icon {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
-            border-radius: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 14px;
         }
+        .feature-icon i { font-size: 24px; color: #60a5fa; }
+        .feature-card h3 { font-size: 1.05rem; margin-bottom: 6px; color: white; }
+        .feature-card p { color: #94a3b8; font-size: 0.85rem; line-height: 1.6; }
 
-        .feature-icon i {
-            font-size: 2rem;
-            color: #60a5fa;
-        }
-
-        .feature-card h3, .pricing-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: white;
-        }
-
-        .feature-card p, .testimonial-text {
-            color: #94a3b8;
-            line-height: 1.6;
-        }
-
-        /* Stats */
         .stats {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(6, 182, 212, 0.05));
         }
-
         .stats-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
             text-align: center;
         }
-
         .stat-item {
-            background: rgba(15, 23, 42, 0.6);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 1.5rem;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 14px;
+            padding: 24px 12px;
+            border: 1px solid rgba(59, 130, 246, 0.06);
         }
-
         .stat-item h2 {
-            font-size: 3rem;
+            font-size: 2.4rem;
             font-weight: 800;
             color: #60a5fa;
         }
+        .stat-item p { color: #94a3b8; margin-top: 4px; font-size: 0.8rem; }
 
-        .stat-item p {
-            color: #94a3b8;
-            margin-top: 0.5rem;
+        .pricing-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
-
-        /* Pricing */
+        .pricing-card {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(59, 130, 246, 0.08);
+        }
+        .pricing-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+        }
         .pricing-card.popular {
             border: 2px solid #3b82f6;
             transform: scale(1.02);
         }
-
+        .pricing-card.popular:hover { transform: scale(1.02) translateY(-6px); }
         .popular-badge {
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             display: inline-block;
-            padding: 0.25rem 1rem;
+            padding: 3px 14px;
             border-radius: 50px;
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }
-
+        .pricing-card h3 { font-size: 1.1rem; color: white; margin-bottom: 4px; }
         .price {
-            font-size: 3rem;
+            font-size: 2.4rem;
             font-weight: 800;
             color: #60a5fa;
-            margin: 1rem 0;
+            margin: 10px 0;
         }
-
-        .price span {
-            font-size: 1rem;
-            color: #64748b;
-        }
-
+        .price span { font-size: 0.85rem; color: #64748b; }
         .pricing-features {
             list-style: none;
-            margin: 1.5rem 0;
+            margin: 14px 0 20px;
         }
-
         .pricing-features li {
-            padding: 0.5rem 0;
+            padding: 5px 0;
             color: #94a3b8;
+            font-size: 0.85rem;
         }
+        .pricing-features i { color: #10b981; margin-right: 8px; }
 
-        .pricing-features i {
-            color: #10b981;
-            margin-right: 0.5rem;
+        .testimonials-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
         }
-
-        /* Testimonial Avatar */
+        .testimonial-card {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 28px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(59, 130, 246, 0.08);
+        }
+        .testimonial-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+        }
         .testimonial-avatar {
-            width: 70px;
-            height: 70px;
+            width: 56px;
+            height: 56px;
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.8rem;
-            font-weight: bold;
+            margin: 0 auto 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
             color: white;
         }
-
+        .testimonial-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.6; }
         .testimonial-name {
             font-weight: 600;
             color: #60a5fa;
-            margin-top: 1rem;
+            margin-top: 10px;
+            font-size: 0.85rem;
         }
 
-        /* CTA */
         .cta {
             text-align: center;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
-            border-radius: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.08));
+            padding: 50px 20px;
         }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .cta p {
-            color: #94a3b8;
-            margin-bottom: 2rem;
-        }
-
+        .cta h2 { font-size: 2rem; margin-bottom: 10px; }
+        .cta p { color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem; }
         .btn-cta {
             background: linear-gradient(135deg, #3b82f6, #06b6d4);
-            padding: 1rem 2.5rem;
+            padding: 14px 38px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
+            font-size: 0.95rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 10px;
             color: white;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-            transition: all 0.3s;
+            box-shadow: 0 4px 30px rgba(59, 130, 246, 0.35);
+            transition: all 0.3s ease;
         }
-
         .btn-cta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 45px rgba(59, 130, 246, 0.5);
         }
 
-        /* Pricing Button Styles */
-        .pricing-card .btn-secondary {
-            background: #334155;
-            box-shadow: none;
-        }
-
-        /* Footer */
         .footer {
             background: rgba(10, 14, 26, 0.95);
-            border-top: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 3rem 2rem 2rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.06);
+            padding: 32px 20px 16px;
         }
-
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
         }
-
-        .footer-section h4 {
-            color: white;
-            margin-bottom: 1rem;
-        }
-
+        .footer-section h4 { color: white; margin-bottom: 10px; font-size: 0.9rem; }
         .footer-section p, .footer-section a {
             color: #94a3b8;
-            line-height: 1.6;
+            font-size: 0.8rem;
+            line-height: 1.8;
             text-decoration: none;
             display: block;
-            margin-bottom: 0.5rem;
-            transition: color 0.3s;
         }
-
-        .footer-section a:hover {
-            color: #60a5fa;
-        }
-
+        .footer-section a:hover { color: #60a5fa; }
         .social-links {
             display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
+            gap: 8px;
+            margin-top: 8px;
         }
-
         .social-links a {
-            width: 35px;
-            height: 35px;
-            background: rgba(59, 130, 246, 0.1);
+            width: 32px;
+            height: 32px;
+            background: rgba(59, 130, 246, 0.08);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
-
         .social-links a:hover {
             background: #3b82f6;
             transform: translateY(-3px);
         }
-
         .footer-bottom {
             text-align: center;
-            padding-top: 2rem;
-            margin-top: 2rem;
-            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            padding-top: 16px;
+            margin-top: 24px;
+            border-top: 1px solid rgba(59, 130, 246, 0.06);
             color: #64748b;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
+        }
+
+        /* ===== RESPONSIVE - JAM DAN TANGGAL TETAP TAMPIL ===== */
+        @media (max-width: 1024px) {
+            .nav-links { gap: 10px; }
+            .nav-links a { font-size: 0.75rem; }
+        }
+
+        @media (max-width: 820px) {
+            .header-datetime {
+                padding: 2px 10px;
+                min-width: 70px;
+            }
+            .header-time {
+                font-size: 0.8rem;
+                letter-spacing: 1px;
+            }
+            .header-date {
+                font-size: 0.4rem;
+            }
+            .nav-links a:not(.btn-login):not(.btn-register) {
+                display: none;
+            }
         }
 
         @media (max-width: 768px) {
-            .nav-container { flex-direction: column; gap: 1rem; }
-            .hero h1 { font-size: 2rem; }
-            .hero-buttons { flex-direction: column; align-items: center; }
-            .section-title { font-size: 1.8rem; }
-            .time { font-size: 1rem; }
-            .datetime { padding: 5px 12px; }
+            .header {
+                top: 24px;
+                padding: 6px 0;
+            }
+            .header-inner { padding: 0 12px; gap: 4px; }
+            
+            .logo-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+            .logo-text h1 {
+                font-size: 0.9rem;
+            }
+            .logo-text p {
+                font-size: 0.4rem;
+            }
+
+            /* ===== JAM + TANGGAL TETAP TAMPIL DI HP ===== */
+            .header-datetime {
+                padding: 2px 8px;
+                border-radius: 20px;
+                min-width: 60px;
+            }
+            .header-time {
+                font-size: 0.7rem;
+                letter-spacing: 0.5px;
+            }
+            .header-date {
+                font-size: 0.35rem;
+                margin-top: 0px;
+            }
+
+            .mobile-toggle {
+                display: block;
+                padding: 4px 10px;
+                font-size: 16px;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(10, 14, 26, 0.98);
+                backdrop-filter: blur(20px);
+                padding: 16px 20px;
+                gap: 10px;
+                border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .nav-links a:not(.btn-login):not(.btn-register) {
+                display: block;
+                font-size: 0.95rem;
+                padding: 8px 0;
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a::after {
+                display: none;
+            }
+            .btn-login, .btn-register {
+                width: 100%;
+                text-align: center;
+                padding: 10px;
+                font-size: 0.9rem !important;
+            }
+
+            .hero {
+                padding: 90px 14px 30px;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero p {
+                font-size: 0.9rem;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .hero-buttons a {
+                justify-content: center;
+            }
+
+            section { padding: 32px 14px; }
+            .section-title {
+                font-size: 1.5rem;
+                margin-bottom: 24px;
+            }
+
+            .features-grid, .pricing-grid, .testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-item {
+                padding: 18px 10px;
+            }
+            .stat-item h2 {
+                font-size: 1.8rem;
+            }
+
+            .pricing-card.popular {
+                transform: scale(1);
+            }
+            .pricing-card.popular:hover {
+                transform: translateY(-6px);
+            }
+
+            .cta h2 {
+                font-size: 1.5rem;
+            }
+            .btn-cta {
+                width: 100%;
+                justify-content: center;
+                padding: 14px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
         }
+
+        @media (max-width: 480px) {
+            .running-text {
+                font-size: 10px;
+                padding: 4px 0;
+            }
+            .header {
+                top: 20px;
+                padding: 4px 0;
+            }
+            .header-inner { padding: 0 8px; gap: 3px; }
+
+            .logo-icon {
+                width: 26px;
+                height: 26px;
+                font-size: 11px;
+                border-radius: 8px;
+            }
+            .logo-text h1 {
+                font-size: 0.75rem;
+            }
+            .logo-text p {
+                font-size: 0.3rem;
+                letter-spacing: 1px;
+            }
+
+            /* ===== JAM + TANGGAL TETAP TAMPIL DI HP KECIL ===== */
+            .header-datetime {
+                padding: 1px 6px;
+                border-radius: 14px;
+                min-width: 50px;
+            }
+            .header-time {
+                font-size: 0.6rem;
+                letter-spacing: 0.3px;
+            }
+            .header-date {
+                font-size: 0.3rem;
+                margin-top: 0px;
+            }
+
+            .mobile-toggle {
+                padding: 3px 8px;
+                font-size: 14px;
+            }
+
+            .hero {
+                padding: 75px 10px 20px;
+            }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .hero p {
+                font-size: 0.8rem;
+            }
+            .hero-badge {
+                font-size: 0.6rem;
+                padding: 3px 12px;
+            }
+            .btn-primary, .btn-outline {
+                padding: 10px 20px;
+                font-size: 0.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-item {
+                padding: 12px 8px;
+                border-radius: 10px;
+            }
+            .stat-item h2 {
+                font-size: 1.4rem;
+            }
+            .stat-item p {
+                font-size: 0.7rem;
+            }
+
+            .feature-card {
+                padding: 20px 16px;
+            }
+            .feature-icon {
+                width: 44px;
+                height: 44px;
+            }
+            .feature-icon i {
+                font-size: 18px;
+            }
+            .feature-card h3 {
+                font-size: 0.95rem;
+            }
+
+            .pricing-card {
+                padding: 20px 16px;
+            }
+            .price {
+                font-size: 2rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .header-time {
+                font-size: 0.5rem;
+            }
+            .header-date {
+                font-size: 0.25rem;
+            }
+            .header-datetime {
+                padding: 1px 4px;
+                min-width: 40px;
+            }
+            .logo-icon {
+                width: 22px;
+                height: 22px;
+                font-size: 9px;
+            }
+            .logo-text h1 {
+                font-size: 0.65rem;
+            }
+            .logo-text p {
+                font-size: 0.25rem;
+            }
+        }
+
+        html { scroll-behavior: smooth; }
     </style>
 </head>
 <body>
     <div class="bg-gradient"></div>
     <div class="particles" id="particles"></div>
 
-    <!-- RUNNING TEXT -->
+    <!-- ===== RUNNING TEXT ===== -->
     <div class="running-text">
         <span>
             <i class="fas fa-fire"></i> <span class="highlight">HOT PROMO!</span> Diskon 20% untuk pesanan pertama Anda! 
@@ -603,32 +918,47 @@
             <i class="fas fa-clock"></i> Layanan <span class="highlight">Express 3 Jam</span> siap membantu Anda!
             <i class="fas fa-gift"></i> Free deterjen wangi + pewangi untuk setiap transaksi!
             <i class="fas fa-star"></i> <span class="highlight">Laundry int</span> - Solusi Laundry Modern & Terpercaya!
-            <i class="fas fa-tag"></i> Hemat hingga 50% untuk paket berlangganan!
-            <i class="fas fa-check-circle"></i> Garansi kepuasan 100% uang kembali!
         </span>
     </div>
 
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
+    <!-- ===== HEADER ===== -->
+    <header class="header" id="header">
+        <div class="header-inner">
+            <!-- Logo -->
+            <a href="#home" class="logo">
                 <div class="logo-icon"><i class="fas fa-tshirt"></i></div>
-                <div><h1>Laundry int</h1><p>Premium Laundry Service</p></div>
+                <div class="logo-text">
+                    <h1>Laundry <span>int</span></h1>
+                    <p>Premium Laundry Service</p>
+                </div>
+            </a>
+
+            <!-- ===== JAM DIGITAL + TANGGAL - TETAP TAMPIL DI SEMUA UKURAN ===== -->
+            <div class="header-datetime">
+                <div class="header-time" id="headerTime">
+                    <span id="hours">00</span><span class="blink">:</span><span id="minutes">00</span><span class="blink">:</span><span id="seconds">00</span>
+                </div>
+                <div class="header-date" id="headerDate">--, -- -- ----</div>
             </div>
-            <div class="datetime">
-                <div class="time" id="currentTime">--:--:--</div>
-                <div class="date" id="currentDate">--, -- -- ----</div>
-            </div>
-            <div class="nav-links">
-                <a href="#home">Beranda</a>
+
+            <!-- Tombol Mobile -->
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Navigasi -->
+            <nav class="nav-links" id="navLinks">
+                <a href="#home" class="active">Beranda</a>
                 <a href="#features">Fitur</a>
                 <a href="#pricing">Harga</a>
                 <a href="#testimonials">Testimoni</a>
                 <a href="login.html" class="btn-login">Login</a>
                 <a href="register.html" class="btn-register">Daftar</a>
-            </div>
+            </nav>
         </div>
-    </nav>
+    </header>
 
+    <!-- ===== HERO ===== -->
     <section class="hero" id="home">
         <div class="hero-content">
             <div class="hero-badge"><i class="fas fa-bolt"></i> Laundry Digital #1</div>
@@ -641,86 +971,225 @@
         </div>
     </section>
 
+    <!-- ===== FEATURES ===== -->
     <section id="features">
         <h2 class="section-title">Kenapa Memilih <span>Laundry int?</span></h2>
         <div class="features-grid">
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-mobile-alt"></i></div><h3>Pesan Online</h3><p>Pesan laundry kapan saja, dimana saja via website.</p></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-truck"></i></div><h3>Antar Jemput Gratis</h3><p>Layanan antar jemput gratis untuk area tertentu.</p></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>Tracking Real-Time</h3><p>Pantau status laundry Anda secara real-time.</p></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-gem"></i></div><h3>Kualitas Premium</h3><p>Menggunakan deterjen berkualitas tinggi.</p></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-clock"></i></div><h3>Cepat & Tepat Waktu</h3><p>Proses cepat dengan hasil maksimal.</p></div>
-            <div class="feature-card"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><h3>Garansi Kepuasan</h3><p>Kami jamin kepuasan Anda 100%.</p></div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Pesan Online</h3>
+                <p>Pesan laundry kapan saja, dimana saja via website.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-truck"></i></div>
+                <h3>Antar Jemput Gratis</h3>
+                <p>Layanan antar jemput gratis untuk area tertentu.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Tracking Real-Time</h3>
+                <p>Pantau status laundry Anda secara real-time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-gem"></i></div>
+                <h3>Kualitas Premium</h3>
+                <p>Menggunakan deterjen berkualitas tinggi.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                <h3>Cepat & Tepat Waktu</h3>
+                <p>Proses cepat dengan hasil maksimal.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Garansi Kepuasan</h3>
+                <p>Kami jamin kepuasan Anda 100%.</p>
+            </div>
         </div>
     </section>
 
+    <!-- ===== STATS ===== -->
     <section class="stats">
         <div class="stats-grid">
-            <div class="stat-item"><h2 class="counter" data-target="5000">0</h2><p>+ Pelanggan Puas</p></div>
-            <div class="stat-item"><h2 class="counter" data-target="15000">0</h2><p>+ Kiloan Diproses</p></div>
-            <div class="stat-item"><h2 class="counter" data-target="98">0</h2><p>% Kepuasan</p></div>
-            <div class="stat-item"><h2 class="counter" data-target="24">0</h2><p>Jam Selesai</p></div>
+            <div class="stat-item">
+                <h2 class="counter" data-target="5000">0</h2>
+                <p>+ Pelanggan Puas</p>
+            </div>
+            <div class="stat-item">
+                <h2 class="counter" data-target="15000">0</h2>
+                <p>+ Kiloan Diproses</p>
+            </div>
+            <div class="stat-item">
+                <h2 class="counter" data-target="98">0</h2>
+                <p>% Kepuasan</p>
+            </div>
+            <div class="stat-item">
+                <h2 class="counter" data-target="24">0</h2>
+                <p>Jam Selesai</p>
+            </div>
         </div>
     </section>
 
+    <!-- ===== PRICING ===== -->
     <section id="pricing">
         <h2 class="section-title">Pilihan <span>Layanan Laundry</span></h2>
         <div class="pricing-grid">
-            <div class="pricing-card"><h3>Cuci Kering</h3><div class="price">Rp 5K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci bersih</li><li><i class="fas fa-check"></i> Wangi tahan lama</li><li><i class="fas fa-check"></i> Lipat rapi</li><li><i class="fas fa-check"></i> Selesai 1x24 jam</li></ul><a href="register.html" class="btn-primary btn-secondary">Pilih Paket</a></div>
-            <div class="pricing-card popular"><div class="popular-badge">⭐ Paling Laris</div><h3>Cuci Setrika</h3><div class="price">Rp 7K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci bersih</li><li><i class="fas fa-check"></i> Setrika rapi</li><li><i class="fas fa-check"></i> Wangi tahan lama</li><li><i class="fas fa-check"></i> Selesai 1x24 jam</li></ul><a href="register.html" class="btn-primary">Pilih Paket</a></div>
-            <div class="pricing-card"><h3>Express 3 Jam</h3><div class="price">Rp 15K<span>/kg</span></div><ul class="pricing-features"><li><i class="fas fa-check"></i> Cuci kilat</li><li><i class="fas fa-check"></i> Setrika rapi</li><li><i class="fas fa-check"></i> Selesai 3 jam</li><li><i class="fas fa-check"></i> Prioritas</li></ul><a href="register.html" class="btn-primary btn-secondary">Pilih Paket</a></div>
+            <div class="pricing-card">
+                <h3>Cuci Kering</h3>
+                <div class="price">Rp 5K<span>/kg</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Cuci bersih</li>
+                    <li><i class="fas fa-check"></i> Wangi tahan lama</li>
+                    <li><i class="fas fa-check"></i> Lipat rapi</li>
+                    <li><i class="fas fa-check"></i> Selesai 1x24 jam</li>
+                </ul>
+                <a href="register.html" class="btn-primary" style="background:#334155; box-shadow:none;">Pilih Paket</a>
+            </div>
+            <div class="pricing-card popular">
+                <div class="popular-badge">⭐ Paling Laris</div>
+                <h3>Cuci Setrika</h3>
+                <div class="price">Rp 7K<span>/kg</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Cuci bersih</li>
+                    <li><i class="fas fa-check"></i> Setrika rapi</li>
+                    <li><i class="fas fa-check"></i> Wangi tahan lama</li>
+                    <li><i class="fas fa-check"></i> Selesai 1x24 jam</li>
+                </ul>
+                <a href="register.html" class="btn-primary">Pilih Paket</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Express 3 Jam</h3>
+                <div class="price">Rp 15K<span>/kg</span></div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Cuci kilat</li>
+                    <li><i class="fas fa-check"></i> Setrika rapi</li>
+                    <li><i class="fas fa-check"></i> Selesai 3 jam</li>
+                    <li><i class="fas fa-check"></i> Prioritas</li>
+                </ul>
+                <a href="register.html" class="btn-primary" style="background:#334155; box-shadow:none;">Pilih Paket</a>
+            </div>
         </div>
     </section>
 
+    <!-- ===== TESTIMONIALS ===== -->
     <section id="testimonials">
         <h2 class="section-title"><span>Apa Kata Pelanggan?</span></h2>
         <div class="testimonials-grid">
-            <div class="testimonial-card"><div class="testimonial-avatar">B</div><p class="testimonial-text">"Pelayanan cepat dan rapi. Pakaian wangi dan bersih. Recomended!"</p><p class="testimonial-name">Budi Santoso</p></div>
-            <div class="testimonial-card"><div class="testimonial-avatar">S</div><p class="testimonial-text">"Sistem tracking-nya mantap! Bisa lihat status laundry dari HP."</p><p class="testimonial-name">Siti Aminah</p></div>
-            <div class="testimonial-card"><div class="testimonial-avatar">R</div><p class="testimonial-text">"Harga bersahabat, kualitas juara. Antar jemput gratisnya membantu banget."</p><p class="testimonial-name">Rudi Hartono</p></div>
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">B</div>
+                <p class="testimonial-text">"Pelayanan cepat dan rapi. Pakaian wangi dan bersih. Recomended!"</p>
+                <p class="testimonial-name">Budi Santoso</p>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">S</div>
+                <p class="testimonial-text">"Sistem tracking-nya mantap! Bisa lihat status laundry dari HP."</p>
+                <p class="testimonial-name">Siti Aminah</p>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-avatar">R</div>
+                <p class="testimonial-text">"Harga bersahabat, kualitas juara. Antar jemput gratisnya membantu banget."</p>
+                <p class="testimonial-name">Rudi Hartono</p>
+            </div>
         </div>
     </section>
 
+    <!-- ===== CTA ===== -->
     <section class="cta">
         <h2>Siap Menikmati Layanan Laundry Modern?</h2>
         <p>Daftar sekarang dan dapatkan diskon 20% untuk pesanan pertama Anda!</p>
         <a href="register.html" class="btn-cta"><i class="fas fa-arrow-right"></i> Daftar Sekarang</a>
     </section>
 
+    <!-- ===== FOOTER ===== -->
     <footer class="footer">
         <div class="footer-content">
-            <div class="footer-section"><h4>Laundry int</h4><p>Solusi laundry modern dengan sistem digital. Mudah, cepat, dan terpercaya.</p><div class="social-links"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a><a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a></div></div>
-            <div class="footer-section"><h4>Layanan</h4><a href="#">Cuci Setrika</a><a href="#">Cuci Kering</a><a href="#">Setrika Saja</a><a href="#">Dry Cleaning</a><a href="#">Express 3 Jam</a></div>
-            <div class="footer-section"><h4>Informasi</h4><a href="#">Tentang Kami</a><a href="#">Kebijakan Privasi</a><a href="#">Syarat & Ketentuan</a><a href="#">FAQ</a></div>
-            <div class="footer-section"><h4>Kontak</h4><p><i class="fas fa-phone"></i> (021) 1234 5678</p><p><i class="fab fa-whatsapp"></i> 0812-3456-7890</p><p><i class="fas fa-envelope"></i> info@laundryint.com</p><p><i class="fas fa-map-marker-alt"></i> Jl. Laundry No. 123, Jakarta</p></div>
+            <div class="footer-section">
+                <h4>Laundry int</h4>
+                <p>Solusi laundry modern dengan sistem digital. Mudah, cepat, dan terpercaya.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Layanan</h4>
+                <a href="#">Cuci Setrika</a>
+                <a href="#">Cuci Kering</a>
+                <a href="#">Setrika Saja</a>
+                <a href="#">Dry Cleaning</a>
+                <a href="#">Express 3 Jam</a>
+            </div>
+            <div class="footer-section">
+                <h4>Informasi</h4>
+                <a href="#">Tentang Kami</a>
+                <a href="#">Kebijakan Privasi</a>
+                <a href="#">Syarat & Ketentuan</a>
+                <a href="#">FAQ</a>
+            </div>
+            <div class="footer-section">
+                <h4>Kontak</h4>
+                <p><i class="fas fa-phone"></i> (021) 1234 5678</p>
+                <p><i class="fab fa-whatsapp"></i> 0812-3456-7890</p>
+                <p><i class="fas fa-envelope"></i> info@laundryint.com</p>
+                <p><i class="fas fa-map-marker-alt"></i> Jl. Laundry No. 123, Jakarta</p>
+            </div>
         </div>
-        <div class="footer-bottom"><p>&copy; 2025 Laundry int. All rights reserved. | Premium Laundry Service</p></div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Laundry int. All rights reserved. | Premium Laundry Service</p>
+        </div>
     </footer>
 
     <script>
-        // Jam real-time
-        function updateDateTime() {
+        // ===== JAM DIGITAL REAL-TIME =====
+        function updateClock() {
             const now = new Date();
-            document.getElementById('currentTime').innerText = now.toLocaleTimeString('id-ID', { hour12: false });
-            document.getElementById('currentDate').innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+            
+            const dateStr = now.toLocaleDateString('id-ID', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            document.getElementById('headerDate').textContent = dateStr;
         }
-        setInterval(updateDateTime, 1000);
-        updateDateTime();
+        updateClock();
+        setInterval(updateClock, 1000);
 
-        // Particles
+        // ===== HEADER SCROLL EFFECT =====
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.pageYOffset > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // ===== PARTICLES =====
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 120; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = Math.random() * 10 + 10 + 's';
-                container.appendChild(particle);
+            for (let i = 0; i < 100; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = Math.random() * 10 + 10 + 's';
+                container.appendChild(p);
             }
         }
         createParticles();
 
-        // Counter Animation
+        // ===== COUNTER ANIMATION =====
         const counters = document.querySelectorAll('.counter');
         const animateCounter = (counter) => {
             const target = parseInt(counter.getAttribute('data-target'));
@@ -728,24 +1197,58 @@
             const increment = target / 50;
             const update = () => {
                 current += increment;
-                if (current < target) { counter.innerText = Math.ceil(current); setTimeout(update, 30); }
-                else { counter.innerText = target; }
+                if (current < target) {
+                    counter.innerText = Math.ceil(current);
+                    setTimeout(update, 30);
+                } else {
+                    counter.innerText = target;
+                }
             };
             update();
         };
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) { animateCounter(entry.target); observer.unobserve(entry.target); } });
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
         }, { threshold: 0.5 });
         counters.forEach(counter => observer.observe(counter));
 
-        // Smooth Scroll
+        // ===== SMOOTH SCROLL =====
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.querySelectorAll('.nav-links a:not(.btn-login):not(.btn-register)').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    document.getElementById('navLinks').classList.remove('open');
+                }
             });
         });
+
+        // ===== MOBILE TOGGLE =====
+        (function() {
+            const toggle = document.getElementById('mobileToggle');
+            const links = document.getElementById('navLinks');
+            if (!toggle || !links) return;
+
+            toggle.addEventListener('click', function() {
+                links.classList.toggle('open');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.header-inner')) {
+                    links.classList.remove('open');
+                }
+            });
+        })();
     </script>
 </body>
 </html>
