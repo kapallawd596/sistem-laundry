@@ -270,15 +270,15 @@
                         <label class="form-label">Email Anda</label>
                         <input type="email" id="resetEmail" class="form-control" placeholder="email@example.com" required>
                     </div>
-                    <button type="submit" class="btn-login" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> Kirim Token Reset</button>
+                    <button type="submit" class="btn-login" style="margin-top:10px;"><i class="fas fa-paper-plane"></i> Kirim Kode OTP</button>
                 </form>
                 
                 <div style="text-align: center; margin: 15px 0; color: #64748B;">atau</div>
                 
                 <form id="resetForm">
                     <div class="form-group">
-                        <label class="form-label">Token Reset</label>
-                        <input type="text" id="resetToken" class="form-control" placeholder="Masukkan token yang dikirim" required>
+                        <label class="form-label">Kode OTP</label>
+                        <input type="text" id="resetToken" class="form-control" placeholder="Masukkan 6 digit kode OTP" maxlength="6" inputmode="numeric" pattern="[0-9]*" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password Baru</label>
@@ -438,7 +438,7 @@
                     // Untuk development: tampilkan token di alert
                     if (data.token) {
                         setTimeout(() => {
-                            alert(`🔐 Token Reset Anda: ${data.token}\n\nMasukkan token ini di form reset password.\n\n(Token ini hanya untuk demo, di production akan dikirim via email)`);
+                            alert(`🔐 Kode OTP Anda: ${data.token}\n\nMasukkan kode ini di form reset password.\n\n(Kode ini hanya untuk demo, di production akan dikirim via email)`);
                         }, 500);
                     }
                 } else {

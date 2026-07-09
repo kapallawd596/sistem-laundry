@@ -545,6 +545,17 @@ window.showPayment = function(orderId) {
 function _showManualPayment(order) {
     const fallbackQR = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=LAUNDRY_INT%7C${order.kode}%7C${order.totalBayar}`;
 
+    // ⚠️ GANTI dengan nomor WhatsApp perusahaan/admin (format: 62xxxxxxxxxx, tanpa + atau 0 di depan)
+    const COMPANY_WA_NUMBER = '6288980045976';
+    const waMessage = encodeURIComponent(
+        `Halo, saya mau kirim bukti transfer QRIS untuk pesanan berikut:\n\n` +
+        `Kode Pesanan: ${order.kode}\n` +
+        `Nama: ${order.pelangganNama || ''}\n` +
+        `Total: ${formatRupiah(order.totalBayar)}\n\n` +
+        `(Foto bukti transfer terlampir)`
+    );
+    const waLink = `https://wa.me/${COMPANY_WA_NUMBER}?text=${waMessage}`;
+
     const modalHtml = `
         <div class="modal active" id="paymentModal">
             <div class="modal-content" style="max-width:500px;">
@@ -573,20 +584,15 @@ function _showManualPayment(order) {
                             <img src="/images/QR.jpeg" onerror="this.src='${fallbackQR}'" style="max-width:140px;border-radius:10px;background:white;padding:6px;margin:0 auto;display:block;">
                             <p style="font-size:0.6rem;color:#94a3b8;margin-top:4px;">Scan menggunakan OVO, Dana, GoPay, ShopeePay, LinkAja</p>
                         </div>
-                    </div>
-
-                    <!-- Transfer Bank -->
-                    <div style="margin-bottom:14px;">
-                        <div style="font-weight:600;margin-bottom:4px;font-size:0.8rem;"><i class="fas fa-university"></i> Transfer Bank</div>
-                        <div onclick="copyBankAccount('BCA', '1234567890')" style="background:rgba(59,130,246,0.04);padding:8px 12px;border-radius:8px;margin-bottom:4px;cursor:pointer;display:flex;justify-content:space-between;font-size:0.75rem;">
-                            <span><i class="fas fa-building"></i> BCA - 1234567890</span>
-                            <span style="color:#60A5FA;"><i class="fas fa-copy"></i> Salin</span>
-                        </div>
-                        <div onclick="copyBankAccount('BNI', '1234567891')" style="background:rgba(59,130,246,0.04);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;font-size:0.75rem;">
-                            <span><i class="fas fa-building"></i> BNI - 1234567891</span>
-                            <span style="color:#60A5FA;"><i class="fas fa-copy"></i> Salin</span>
-                        </div>
-                        <button class="btn btn-primary btn-block" style="margin-top:6px;" onclick="processPayment(${order.id}, 'TRANSFER')">✅ Saya Sudah Transfer</button>
+                        ${order.statusPembayaran === 'menunggu_verifikasi' ? `
+                            <div style="margin-top:8px;text-align:center;color:#F59E0B;font-size:0.75rem;background:rgba(245,158,11,0.08);padding:8px;border-radius:8px;">
+                                <i class="fas fa-clock"></i> Menunggu verifikasi admin...
+                            </div>
+                        ` : `
+                            <button class="btn btn-primary btn-block" style="margin-top:8px;background:#25D366;border-color:#25D366;" onclick="sendPaymentProofWA(${order.id}, '${waLink.replace(/'/g, "\\'")}')">
+                                <i class="fab fa-whatsapp"></i> Kirim Bukti Transfer via WA
+                            </button>
+                        `}
                     </div>
 
                     <!-- COD -->
@@ -684,29 +690,30 @@ window.copyEWallet = function(wallet, number) {
     });
 };
 
-window.copyBankAccount = function(bank, number) {
-    navigator.clipboard.writeText(number).then(() => {
-        showToast('success', `No Rekening ${bank} (${number}) sudah disalin!`);
-    }).catch(() => {
-        showToast('error', 'Gagal menyalin ke clipboard');
-    });
-};
-
 window.processCOD = async function(orderId) {
     closeModal('paymentModal');
     showToast('info', 'Pesanan akan diproses. Bayar saat pesanan diantar/diambil ya!');
 };
 
-window.processPayment = async function(orderId, method) {
+// ============================================================
+// KIRIM BUKTI TRANSFER VIA WA (+ tandai menunggu verifikasi admin)
+// ============================================================
+window.sendPaymentProofWA = async function(orderId, waLink) {
+    // Buka WA duluan supaya user nggak ngerasa nunggu/delay
+    window.open(waLink, '_blank');
+
+    // Tandai status "menunggu_verifikasi" di background, biar juga muncul
+    // notifikasi di dashboard admin (jaga-jaga kalau admin belum cek WA)
     try {
-        await LaundryAPI.updatePesanan(orderId, { statusPembayaran: 'lunas' });
-        closeModal('paymentModal');
-        showToast('success', 'Pembayaran berhasil! Terima kasih.');
+        await LaundryAPI.request(`/pesanan/${orderId}/konfirmasi-bayar`, { method: 'POST' });
         await loadData();
         await loadPage('pesanan');
-    } catch(e) {
-        showToast('error', e.message);
+    } catch (e) {
+        // Diamkan saja kalau gagal — yang penting WA sudah kebuka,
+        // admin tetap bisa lihat manual dari chat WA
+        console.warn('Gagal update status menunggu_verifikasi:', e.message);
     }
+    closeModal('paymentModal');
 };
 
 // ============================================================
@@ -1262,9 +1269,8 @@ window.trackOrder           = trackOrder;
 window.showStruk            = showStruk;
 window.showPayment          = showPayment;
 window.retryMidtrans        = retryMidtrans;
-window.processPayment       = processPayment;
+window.sendPaymentProofWA   = sendPaymentProofWA;
 window.processCOD           = processCOD;
-window.copyBankAccount      = copyBankAccount;
 window.copyEWallet          = copyEWallet;
 window.editProfile          = editProfile;
 window.saveProfile          = saveProfile;

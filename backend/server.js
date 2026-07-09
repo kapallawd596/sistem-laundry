@@ -21,6 +21,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('./database');
 const midtransClient = require('midtrans-client');
+const { sendResetPasswordEmail } = require('./mailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -850,28 +851,55 @@ app.post('/api/notification-settings', authenticate, async (req, res) => {
 });
 
 // ============ [CRIT-4] FORGOT PASSWORD ============
-const resetTokens = new Map();
+// ⚠️ PENTING: token TIDAK disimpan di memory (Map) lagi, karena di Vercel
+// (serverless) tiap request bisa dieksekusi di instance yang berbeda-beda,
+// sehingga Map di memory sering "kosong" lagi dan token dianggap hilang/kadaluarsa.
+// Sekarang token disimpan di kolom `reset_token` & `reset_token_expires` di tabel users.
+//
+// ✅ Token sekarang berupa OTP 6 digit angka (bukan hex 64 karakter) supaya
+// gampang diketik manual oleh user, dengan masa berlaku diperpendek jadi 10 menit
+// (kombinasi 6 digit jauh lebih sedikit daripada hex 64 karakter, jadi expiry
+// harus lebih singkat untuk tetap aman dari brute-force).
 
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ success: false, message: 'Email wajib diisi' });
 
     try {
-        const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase().trim()]);
+        const emailLower = email.toLowerCase().trim();
+        const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [emailLower]);
 
         if (users.length === 0) {
-            return res.json({ success: true, message: 'Jika email terdaftar, link reset akan dikirimkan' });
+            return res.json({ success: true, message: 'Jika email terdaftar, kode OTP akan dikirimkan' });
         }
 
         const crypto = require('crypto');
-        const token = crypto.randomBytes(32).toString('hex');
-        resetTokens.set(email.toLowerCase().trim(), { token, expiresAt: Date.now() + 3600000 });
+        // OTP 6 digit angka (000000 - 999999), pakai crypto biar tetap random & aman
+        const token = crypto.randomInt(0, 1000000).toString().padStart(6, '0');
+        const expiresAt = Date.now() + 10 * 60 * 1000; // 10 menit
 
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`\n🔐 [DEV ONLY] RESET TOKEN untuk ${email}: ${token}\n`);
+        // ✅ Simpan token & masa berlaku ke DATABASE (bukan memory) supaya
+        // tetap valid walau request selanjutnya jalan di instance server lain.
+        await pool.query(
+            'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE email = ?',
+            [token, expiresAt, emailLower]
+        );
+
+        // ✅ Kirim email sungguhan berisi OTP reset
+        const emailSent = await sendResetPasswordEmail(emailLower, token);
+
+        if (!emailSent && process.env.NODE_ENV !== 'production') {
+            // Fallback dev: kalau SMTP belum dikonfigurasi, token tetap dikirim
+            // di response supaya development tetap bisa jalan.
+            console.log(`\n🔐 [DEV ONLY] RESET OTP untuk ${email}: ${token}\n`);
+            return res.json({
+                success: true,
+                message: 'SMTP belum dikonfigurasi. Kode OTP ditampilkan untuk keperluan development.',
+                token // hanya dikirim balik saat dev & SMTP belum aktif
+            });
         }
 
-        res.json({ success: true, message: 'Jika email terdaftar, link reset akan dikirimkan' });
+        res.json({ success: true, message: 'Jika email terdaftar, kode OTP akan dikirimkan' });
     } catch (err) {
         sendError(res, 500, 'Gagal proses reset password', err);
     }
@@ -887,21 +915,25 @@ app.post('/api/reset-password', async (req, res) => {
     }
 
     try {
-        let foundEmail = null;
-        for (const [email, data] of resetTokens.entries()) {
-            if (data.token === token && data.expiresAt > Date.now()) {
-                foundEmail = email;
-                break;
-            }
-        }
+        // ✅ Cari token dari DATABASE, bukan Map di memory
+        const [users] = await pool.query(
+            'SELECT id, email FROM users WHERE reset_token = ? AND reset_token_expires > ?',
+            [token, Date.now()]
+        );
 
-        if (!foundEmail) {
+        if (users.length === 0) {
             return res.status(400).json({ success: false, message: 'Token tidak valid atau sudah kadaluarsa' });
         }
 
+        const foundEmail = users[0].email;
         const hashed = await bcrypt.hash(newPassword, 12);
-        await pool.query('UPDATE users SET password = ? WHERE email = ?', [hashed, foundEmail]);
-        resetTokens.delete(foundEmail);
+
+        // Update password sekaligus hapus token supaya tidak bisa dipakai ulang
+        await pool.query(
+            'UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE email = ?',
+            [hashed, foundEmail]
+        );
+
         res.json({ success: true, message: 'Password berhasil direset' });
     } catch (err) {
         sendError(res, 500, 'Gagal reset password', err);
@@ -909,6 +941,48 @@ app.post('/api/reset-password', async (req, res) => {
 });
 
 // ============ MIDTRANS PAYMENT API ============
+
+// ============ KONFIRMASI PEMBAYARAN MANUAL (QRIS statis) ============
+// Dipakai customer setelah scan & bayar via QR statis perusahaan (Dana/GoPay Merchant).
+// TIDAK langsung set 'lunas' — hanya set 'menunggu_verifikasi', supaya admin/karyawan
+// yang cek mutasi Dana/GoPay Bisnis secara manual dan konfirmasi lewat panel admin.
+// Ini mencegah user asal klik "sudah bayar" tanpa transfer beneran.
+app.post('/api/pesanan/:id/konfirmasi-bayar', authenticate, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'ID tidak valid' });
+
+        const [orders] = await pool.query(
+            'SELECT id, status_pembayaran, pelanggan_nama FROM pesanan WHERE id = ? AND pelanggan_id = ?',
+            [id, req.user.id]
+        );
+
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+        }
+
+        const order = orders[0];
+
+        if (order.status_pembayaran === 'lunas') {
+            return res.status(400).json({ success: false, message: 'Pesanan sudah lunas' });
+        }
+
+        if (order.status_pembayaran === 'menunggu_verifikasi') {
+            return res.json({ success: true, message: 'Konfirmasi sebelumnya masih menunggu diperiksa admin' });
+        }
+
+        await pool.query(
+            'UPDATE pesanan SET status_pembayaran = ? WHERE id = ?',
+            ['menunggu_verifikasi', id]
+        );
+
+        await addAktivitas(`💳 ${order.pelanggan_nama} konfirmasi bayar QRIS untuk pesanan ID ${id} — perlu diverifikasi`, 'warning');
+
+        res.json({ success: true, message: 'Terima kasih! Pembayaran akan diverifikasi admin dalam waktu singkat.' });
+    } catch (err) {
+        sendError(res, 500, 'Gagal konfirmasi pembayaran', err);
+    }
+});
 
 // Create Payment Token
 app.post('/api/create-payment-token', authenticate, async (req, res) => {

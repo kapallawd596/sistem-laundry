@@ -289,11 +289,22 @@ function renderPesananRow(p) {
                     <option value="selesai" ${p.status === 'selesai' ? 'selected' : ''}>✅ Selesai</option>
                     <option value="diambil" ${p.status === 'diambil' ? 'selected' : ''}>📦 Diambil</option>
                 </select>
-                <!-- ❌ TOMBOL BAYAR DIHAPUS! Karyawan tidak boleh update pembayaran -->
+                ${p.statusPembayaran === 'menunggu_verifikasi' ? `<button class="btn btn-sm btn-success" onclick="konfirmasiLunasKaryawan(${p.id})"><i class="fas fa-check-circle"></i> Konfirmasi Lunas</button>` : ''}
             </td>
         </tr>
     `;
 }
+
+window.konfirmasiLunasKaryawan = async function(orderId) {
+    if (!confirm('Pastikan sudah cek bukti transfer (WA/mutasi) dan uang benar-benar masuk. Konfirmasi sebagai Lunas?')) return;
+    try {
+        await LaundryAPI.updatePesanan(orderId, { status_pembayaran: 'lunas' });
+        showToast('success', '✅ Pembayaran dikonfirmasi lunas');
+        await loadPesanan();
+    } catch (e) {
+        showToast('error', e.message || 'Gagal konfirmasi pembayaran');
+    }
+};
 
 function filterPesanan() {
     const search = document.getElementById('searchPesanan')?.value.toLowerCase() || '';
