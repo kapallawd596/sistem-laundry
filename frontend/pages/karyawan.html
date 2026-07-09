@@ -2,26 +2,47 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karyawan Dashboard - LaundryPro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard Karyawan - LaundryInt</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="bg-gradient"></div>
-    <div class="particles" id="particles"></div>
 
-    <div class="sidebar">
+    <!-- ====== MOBILE: Hamburger + Overlay ====== -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="particles" id="particles"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="logo">
             <div class="logo-icon"><i class="fas fa-tools"></i></div>
-            <h2>LaundryPro</h2>
-            <p>Karyawan Panel</p>
+            <h2>Laundry int</h2>
+            <p>Karyawan • Dashboard</p>
         </div>
         <div class="menu-item active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</div>
         <div class="menu-item" data-page="pesanan"><i class="fas fa-receipt"></i> Kelola Pesanan</div>
-        <div class="menu-item" data-page="pelanggan"><i class="fas fa-users"></i> Pelanggan</div>
+        <div class="menu-item" data-page="pelanggan"><i class="fas fa-users"></i> Data Pelanggan</div>
         <div class="menu-item logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+
+    <!-- ====== MOBILE HEADER ====== -->
+    <div class="mobile-header" id="mobileHeader">
+        <div class="mobile-header-title">
+            <i class="fas fa-home" id="mobileHeaderIcon"></i>
+            <span id="mobileTitleText">Dashboard</span>
+        </div>
+        <div class="mobile-user-info">
+            <span class="user-name" id="mobileUserName">Karyawan</span>
+            <div class="user-avatar" id="mobileUserAvatar">K</div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -30,18 +51,44 @@
                 <div class="time" id="currentTime">--:--:--</div>
                 <div class="date" id="currentDate">--, -- -- ----</div>
             </div>
-            <div class="page-title"><i class="fas fa-chart-line"></i> <span id="pageTitle">Dashboard Karyawan</span></div>
+            <div class="page-title">
+                <i class="fas fa-home"></i>
+                <span id="pageTitle">Dashboard</span>
+            </div>
             <div class="user-info">
                 <span class="user-name" id="userName">Karyawan</span>
                 <div class="user-avatar" id="userAvatar">K</div>
             </div>
         </div>
-        <div id="pageContent"><div class="loading"><div class="spinner"></div>Memuat data...</div></div>
+        <div id="pageContent">
+            <div class="loading"><div class="spinner"></div>Memuat data...</div>
+        </div>
     </div>
 
-    <script src="../js/utils.js"></script>
+    <!-- ====== BOTTOM NAVIGATION (Mobile Only) ====== -->
+    <nav class="bottom-nav" aria-label="Navigasi bawah">
+        <div class="bottom-nav-inner">
+            <button class="bottom-nav-item active" data-page="dashboard" aria-label="Dashboard">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="bottom-nav-item" data-page="pesanan" aria-label="Pesanan">
+                <i class="fas fa-receipt"></i>
+                <span>Pesanan</span>
+            </button>
+            <button class="bottom-nav-item" data-page="pelanggan" aria-label="Pelanggan">
+                <i class="fas fa-users"></i>
+                <span>Pelanggan</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== SCRIPTS — setiap file dimuat HANYA 1x ===== -->
     <script src="../js/api.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/missing_functions.js"></script>
     <script src="../js/karyawan.js"></script>
+    <script src="../js/responsive-sidebar.js"></script>
 </body>
 </html>
