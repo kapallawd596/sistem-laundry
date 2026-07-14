@@ -424,6 +424,8 @@ async function renderPesanan() {
                                         ${o.statusPembayaran === 'belum' && o.totalBayar ?
                                             `<button class="btn btn-sm btn-success" onclick="showPayment(${o.id})"><i class="fas fa-credit-card"></i> Bayar</button>` : ''}
                                         <button class="btn btn-sm btn-outline" onclick="trackOrder(${o.id})"><i class="fas fa-map-marker-alt"></i> Tracking</button>
+                                        ${o.status === 'diambil' ?
+                                            `<button class="btn btn-sm btn-outline" onclick="openUlasanModal(${o.id})" id="ulasanBtn-${o.id}"><i class="fas fa-star"></i> Beri Ulasan</button>` : ''}
                                     </td>
                                 </tr>
                             `).join('')}
@@ -823,6 +825,14 @@ window.trackOrder = function(orderId) {
                         ${order.catatan ? `<div class="struk-row" style="font-size:0.75rem;"><span style="color:#94a3b8;">Catatan</span><span style="text-align:right;max-width:50%;">${order.catatan}</span></div>` : ''}
                     </div>
                     
+                    <!-- 🚚 STATUS KURIR LIVE -->
+                    <div id="kurirStatusBox" style="margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);font-size:0.75rem;color:#94a3b8;">
+                        <i class="fas fa-circle-notch fa-spin"></i> Memeriksa status kurir...
+                    </div>
+
+                    <!-- 📸 FOTO BUKTI ANTAR DARI KURIR -->
+                    <div id="kurirProofBox" style="display:none;margin-top:12px;"></div>
+
                     <!-- ✅ PETA LOKASI -->
                     <div style="margin-top:12px;">
                         <div id="trackingMapContainer" style="width:100%;height:200px;border-radius:10px;overflow:hidden;margin-bottom:8px;background:#1e293b;"></div>
@@ -832,7 +842,7 @@ window.trackOrder = function(orderId) {
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="closeModal('trackingModal')">Tutup</button>
+                    <button class="btn btn-primary" onclick="closeTrackingModal()">Tutup</button>
                 </div>
             </div>
         </div>
@@ -841,13 +851,251 @@ window.trackOrder = function(orderId) {
     const existingModal = document.getElementById('trackingModal');
     if (existingModal) existingModal.remove();
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
+    const modalCloseBtn = document.querySelector('#trackingModal .modal-close');
+    if (modalCloseBtn) modalCloseBtn.setAttribute('onclick', 'closeTrackingModal()');
+
     // ✅ Inisialisasi peta setelah modal tampil
     setTimeout(() => {
         initTrackingMap(order);
+        startKurirPolling(order);
     }, 300);
 };
 
+// ============================================================
+// 🚚 LIVE TRACKING KURIR (polling posisi GPS selama modal terbuka)
+// ============================================================
+function startKurirPolling(order) {
+    stopKurirPolling(); // pastikan tidak dobel interval kalau modal dibuka ulang
+
+    const poll = async () => {
+        const box = document.getElementById('kurirStatusBox');
+        if (!box) { stopKurirPolling(); return; } // modal sudah ditutup
+
+        try {
+            const data = await LaundryAPI.getTrackingOrder(order.id);
+            renderKurirStatusBox(data);
+            renderKurirProofPhoto(data);
+            if (data.courierLat && data.courierLng) {
+                updateKurirMarker(parseFloat(data.courierLat), parseFloat(data.courierLng), data.courierLastPing);
+            }
+            if (data.courierStatus === 'delivered') {
+                stopKurirPolling(); // sudah sampai, tidak perlu polling lagi
+            }
+        } catch (e) {
+            box.innerHTML = `<i class="fas fa-exclamation-circle"></i> Gagal memuat status kurir`;
+        }
+    };
+
+    poll(); // langsung cek sekali begitu modal dibuka
+    window._kurirPollInterval = setInterval(poll, 8000); // lalu tiap 8 detik
+}
+
+function stopKurirPolling() {
+    if (window._kurirPollInterval) {
+        clearInterval(window._kurirPollInterval);
+        window._kurirPollInterval = null;
+    }
+}
+
+window.closeTrackingModal = function() {
+    stopKurirPolling();
+    closeModal('trackingModal');
+};
+
+function renderKurirStatusBox(data) {
+    const box = document.getElementById('kurirStatusBox');
+    if (!box) return;
+
+    const map = {
+        belum: { icon: 'fa-box', color: '#64748b', text: 'Kurir belum ditugaskan' },
+        dikirim: { icon: 'fa-truck', color: '#f59e0b', text: 'Kurir sudah ditugaskan, menunggu berangkat' },
+        on_the_way: { icon: 'fa-truck-fast', color: '#3b82f6', text: 'Kurir sedang dalam perjalanan 🚴' },
+        delivered: { icon: 'fa-circle-check', color: '#10b981', text: 'Pesanan sudah diterima ✅' }
+    };
+    const s = map[data.courierStatus] || map.belum;
+    const lastPing = data.courierLastPing ? new Date(data.courierLastPing).toLocaleTimeString('id-ID') : null;
+
+    box.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;color:${s.color};font-weight:600;">
+            <i class="fas ${s.icon}"></i> ${s.text}
+        </div>
+        ${lastPing ? `<div style="margin-top:4px;font-size:0.68rem;color:#64748b;">Update lokasi terakhir: ${lastPing}</div>` : ''}
+    `;
+}
+
+// 📸 Tampilkan foto bukti antar yang dikirim kurir (muncul otomatis saat status delivered)
+function renderKurirProofPhoto(data) {
+    const box = document.getElementById('kurirProofBox');
+    if (!box) return;
+
+    if (data.courierStatus !== 'delivered' || !data.courierPhotoBukti) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+    }
+
+    // Hindari render ulang kalau foto yang sama sudah tampil (cegah flicker tiap polling)
+    if (box.dataset.rendered === '1') return;
+
+    const deliveredTime = data.courierDeliveredAt
+        ? new Date(data.courierDeliveredAt).toLocaleString('id-ID')
+        : null;
+
+    box.style.display = 'block';
+    box.dataset.rendered = '1';
+    box.innerHTML = `
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:12px;">
+            <h4 style="font-size:0.8rem;margin-bottom:8px;color:#10b981;">
+                <i class="fas fa-camera"></i> Foto Bukti Pengantaran
+            </h4>
+            <img
+                src="${data.courierPhotoBukti}"
+                alt="Foto bukti pengantaran dari kurir"
+                style="width:100%;border-radius:8px;display:block;cursor:zoom-in;"
+                onclick="openKurirProofLightbox('${data.courierPhotoBukti}')"
+            >
+            ${deliveredTime ? `<div style="margin-top:6px;font-size:0.68rem;color:#64748b;">Diterima pada: ${deliveredTime}</div>` : ''}
+        </div>
+    `;
+}
+
+// Lightbox sederhana supaya pelanggan bisa lihat foto bukti dalam ukuran penuh
+window.openKurirProofLightbox = function(src) {
+    const existing = document.getElementById('kurirProofLightbox');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'kurirProofLightbox';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;';
+    overlay.innerHTML = `<img src="${src}" style="max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.5);">`;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+};
+
+function updateKurirMarker(lat, lng, lastPing) {
+    const container = document.getElementById('trackingMapContainer');
+    const map = container && container._leaflet_map;
+    if (!map || typeof L === 'undefined') return;
+
+    if (container._kurirMarker) {
+        container._kurirMarker.setLatLng([lat, lng]);
+    } else {
+        container._kurirMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div style="background:#10B981;padding:4px 10px;border-radius:14px;color:white;font-weight:bold;font-size:0.7rem;white-space:nowrap;"><i class="fas fa-motorcycle"></i> Kurir</div>',
+                iconSize: [70, 24],
+                popupAnchor: [0, -10]
+            })
+        }).addTo(map);
+    }
+
+    const timeStr = lastPing ? new Date(lastPing).toLocaleTimeString('id-ID') : '-';
+    container._kurirMarker.bindPopup(`🚚 Posisi kurir terakhir: ${timeStr}`);
+
+    // Perlihatkan kurir & tujuan sekaligus di layar
+    const bounds = L.latLngBounds([container._leaflet_map.getCenter(), [lat, lng]]);
+    map.fitBounds(bounds.pad(0.4), { maxZoom: 16 });
+}
+
+
+
+// ============================================================
+// ⭐ RATING & ULASAN
+// ============================================================
+window.openUlasanModal = async function(orderId) {
+    const order = myOrders.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Cek dulu apakah pesanan ini sudah pernah diberi ulasan
+    let existing = null;
+    try {
+        existing = await LaundryAPI.getUlasanPesanan(orderId);
+    } catch (e) {
+        showToast('error', 'Gagal memeriksa status ulasan');
+        return;
+    }
+
+    const existingHtml = existing ? `
+        <div style="text-align:center;padding:8px 0 4px;">
+            <div style="font-size:1.4rem;color:#f59e0b;letter-spacing:2px;">
+                ${'★'.repeat(existing.rating)}${'☆'.repeat(5 - existing.rating)}
+            </div>
+            ${existing.komentar ? `<p style="color:#cbd5e1;font-size:0.85rem;margin-top:8px;">"${escapeHtml(existing.komentar)}"</p>` : ''}
+            <p style="color:#64748b;font-size:0.7rem;margin-top:8px;">Terima kasih, ulasan kamu sudah kami terima 🙏</p>
+        </div>
+    ` : `
+        <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:10px;">Bagaimana pengalaman laundry-mu untuk pesanan <strong>${order.kode}</strong>?</p>
+        <div id="ulasanStars" style="font-size:1.8rem;color:#475569;text-align:center;letter-spacing:6px;margin:10px 0;cursor:pointer;">
+            ${[1,2,3,4,5].map(n => `<i class="fas fa-star" data-star="${n}" onclick="setUlasanRating(${n})" style="cursor:pointer;"></i>`).join('')}
+        </div>
+        <textarea id="ulasanKomentar" rows="3" maxlength="1000" placeholder="Ceritakan pengalamanmu (opsional)..." style="width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px;color:#e2e8f0;font-size:0.8rem;resize:vertical;"></textarea>
+    `;
+
+    const modalHtml = `
+        <div class="modal active" id="ulasanModal">
+            <div class="modal-content" style="max-width:420px;">
+                <div class="modal-header">
+                    <h3 style="font-size:0.95rem;"><i class="fas fa-star"></i> Ulasan Pesanan</h3>
+                    <button class="modal-close" onclick="closeModal('ulasanModal')">&times;</button>
+                </div>
+                <div class="modal-body">${existingHtml}</div>
+                <div class="modal-footer">
+                    ${existing
+                        ? `<button class="btn btn-primary" onclick="closeModal('ulasanModal')">Tutup</button>`
+                        : `<button class="btn btn-outline" onclick="closeModal('ulasanModal')">Batal</button>
+                           <button class="btn btn-primary" id="submitUlasanBtn" onclick="submitUlasan(${orderId})"><i class="fas fa-paper-plane"></i> Kirim Ulasan</button>`
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+
+    const existingModal = document.getElementById('ulasanModal');
+    if (existingModal) existingModal.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window._ulasanSelectedRating = 0;
+
+window.setUlasanRating = function(n) {
+    window._ulasanSelectedRating = n;
+    document.querySelectorAll('#ulasanStars i').forEach(star => {
+        const val = parseInt(star.getAttribute('data-star'));
+        star.style.color = val <= n ? '#f59e0b' : '#475569';
+    });
+};
+
+window.submitUlasan = async function(orderId) {
+    const rating = window._ulasanSelectedRating;
+    if (!rating) {
+        showToast('error', 'Pilih dulu rating bintangnya ya');
+        return;
+    }
+    const komentar = document.getElementById('ulasanKomentar')?.value.trim() || '';
+
+    const btn = document.getElementById('submitUlasanBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...'; }
+
+    try {
+        await LaundryAPI.addUlasan(orderId, rating, komentar);
+        showToast('success', 'Terima kasih atas ulasan Anda! ⭐');
+        window._ulasanSelectedRating = 0;
+        closeModal('ulasanModal');
+
+        // Ganti tombol jadi "Sudah Diulas" tanpa perlu reload seluruh halaman
+        const orderBtn = document.getElementById(`ulasanBtn-${orderId}`);
+        if (orderBtn) {
+            orderBtn.disabled = true;
+            orderBtn.innerHTML = '<i class="fas fa-check"></i> Sudah Diulas';
+            orderBtn.classList.add('btn-disabled');
+        }
+    } catch (e) {
+        showToast('error', e.message || 'Gagal mengirim ulasan');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Ulasan'; }
+    }
+};
 
 
 // ============================================================

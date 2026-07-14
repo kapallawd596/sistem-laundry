@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kurir — Laundry int</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f4f6f4;
+        color: #222;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px 40px;
+    }
+    .card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        margin-bottom: 16px;
+    }
+    .header { text-align: center; margin-bottom: 8px; }
+    .header h1 { font-size: 20px; color: #2563eb; }
+    .header p { font-size: 13px; color: #777; margin-top: 4px; }
+    .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 2px; }
+    .value { font-size: 15px; margin-bottom: 12px; word-break: break-word; }
+    .value:last-child { margin-bottom: 0; }
+    .btn {
+        display: block;
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:disabled { background: #a9c2ee; }
+    .btn-danger { background: #fff; color: #c62828; border: 2px solid #c62828; }
+    .btn-secondary { background: #f0f0f0; color: #444; }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #e8f0fe;
+        color: #2563eb;
+    }
+    .status-badge.off { background: #ffebee; color: #c62828; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+    .dot.live { animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+    .error-box {
+        background: #ffebee; color: #c62828; padding: 14px; border-radius: 12px;
+        font-size: 14px; text-align: center; max-width: 420px; width: 100%;
+    }
+    .muted { font-size: 12px; color: #999; margin-top: 10px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div id="app" class="card">
+    <div class="header">
+        <h1>📦 Antar Pesanan</h1>
+        <p>Laundry int — Halaman Kurir</p>
+    </div>
+    <p style="text-align:center; color:#888; padding: 20px 0;">Memuat data pesanan...</p>
+</div>
+
+<script>
+// Halaman ini SENGAJA dibuat berdiri sendiri (tanpa login) supaya kurir bisa langsung
+// buka link yang dikirim admin/karyawan lewat WhatsApp, tanpa perlu akun. Keamanannya
+// mengandalkan token acak di URL (kolom courier_token di tabel pesanan), bukan sesi
+// login — jadi JANGAN sebarkan link ini ke orang selain kurir yang dituju.
+// Backend & frontend satu origin (Express static + API di server yang sama), jadi
+// semua request cukup pakai path relatif "/api/...".
+
+const API_URL = '/api';
+
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get('order');
+const token = params.get('token');
+
+const app = document.getElementById('app');
+
+let watchId = null;
+let lastSentAt = 0;
+const SEND_INTERVAL_MS = 10000; // kirim GPS paling cepat tiap 10 detik, biar hemat kuota & baterai kurir
+
+function renderError(message) {
+    document.body.innerHTML = `
+        <div class="error-box">
+            <strong>⚠️ ${message}</strong>
+            <p style="margin-top:8px;">Minta admin kirim ulang link yang baru.</p>
+        </div>
+    `;
+}
+
+async function loadOrderInfo() {
+    if (!orderId || !token) {
+        renderError('Link tidak lengkap.');
+        return;
+    }
+    try {
+        const res = await fetch(`${API_URL}/tracking/courier-info/${orderId}?token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Gagal memuat data');
+        renderCard(data);
+    } catch (err) {
+        renderError(err.message || 'Link tidak valid atau sudah kedaluwarsa.');
+    }
+}
+
+function renderCard(order) {
+    const alreadyDelivered = order.status === 'delivered';
+    const alamat = order.alamatLengkap || '';
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(alamat)}`;
+    const waLink = toWaLink(order.noHp);
+
+    app.innerHTML = `
+        <div class="header">
+            <h1>📦 Antar Pesanan</h1>
+            <p>${escapeHtml(order.kode || ('#' + orderId))}</p>
+        </div>
+        <div class="label">Nama Penerima</div>
+        <div class="value">${escapeHtml(order.namaPenerima)}</div>
+        <div class="label">Alamat</div>
+        <div class="value">${escapeHtml(alamat) || '<span style="color:#c62828;">Alamat belum diisi pelanggan</span>'}</div>
+        <a href="${mapsUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="text-decoration:none; text-align:center; display:block; margin-top:6px;">🧭 Buka Rute di Google Maps</a>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+            ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener" class="btn" style="flex:1; background:#25D366; color:#fff; text-decoration:none; text-align:center; padding:12px;">💬 WhatsApp</a>` : ''}
+            <a href="tel:${escapeHtml(order.noHp)}" class="btn btn-secondary" style="flex:1; text-decoration:none; text-align:center; padding:12px;">📞 Telepon</a>
+        </div>
+        ${order.catatanKurir ? `<div class="label" style="margin-top:12px;">Catatan Pesanan</div><div class="value">📝 ${escapeHtml(order.catatanKurir)}</div>` : ''}
+    `;
+
+    const actionCard = document.createElement('div');
+    actionCard.className = 'card';
+
+    if (alreadyDelivered) {
+        actionCard.innerHTML = `<div style="text-align:center; color:#2563eb; font-weight:700; padding:10px;">✅ Pesanan ini sudah ditandai selesai diantar.</div>`;
+        document.body.appendChild(actionCard);
+        return;
+    }
+
+    actionCard.innerHTML = `
+        <div id="statusBadge" class="status-badge off"><span class="dot"></span> Belum mulai kirim lokasi</div>
+        <button id="startBtn" class="btn btn-primary">▶️ Mulai Antar (kirim lokasi live)</button>
+        <button id="stopBtn" class="btn btn-secondary" style="display:none;">⏸️ Jeda Kirim Lokasi</button>
+        <p class="muted" style="margin-top:16px;">Jaga layar HP tetap menyala & jangan tutup halaman ini selama mengantar, supaya lokasi terus terkirim ke pembeli.</p>
+    `;
+    document.body.appendChild(actionCard);
+
+    // ==================== FOTO BUKTI PENGANTARAN (seperti Shopee) ====================
+    // Kurir WAJIB ambil foto dulu (paket di depan pintu / diterima langsung) sebelum tombol
+    // "Sudah Sampai" bisa ditekan. Ini mencegah kurir menandai selesai tanpa bukti, dan kasih
+    // bukti ke pembeli+admin kalau ada dispute "belum sampai/tidak sesuai".
+    const photoCard = document.createElement('div');
+    photoCard.className = 'card';
+    photoCard.innerHTML = `
+        <div class="label">Foto Bukti Pengantaran (wajib)</div>
+        <div id="photoPreviewBox" style="width:100%; aspect-ratio:4/3; background:#f0f0f0; border-radius:12px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:10px; color:#999; font-size:13px;">
+            Belum ada foto
+        </div>
+        <input type="file" id="proofPhotoInput" accept="image/*" capture="environment" style="display:none;">
+        <button id="takePhotoBtn" class="btn btn-secondary">📷 Ambil / Pilih Foto</button>
+        <button id="deliveredBtn" class="btn btn-danger" disabled style="opacity:.5;">✅ Sudah Sampai / Selesai</button>
+    `;
+    document.body.appendChild(photoCard);
+
+    document.getElementById('startBtn').addEventListener('click', startSharing);
+    document.getElementById('stopBtn').addEventListener('click', stopSharing);
+    document.getElementById('deliveredBtn').addEventListener('click', markDelivered);
+    document.getElementById('takePhotoBtn').addEventListener('click', () => document.getElementById('proofPhotoInput').click());
+    document.getElementById('proofPhotoInput').addEventListener('change', onProofPhotoSelected);
+}
+
+let proofPhotoDataUrl = null;
+
+// Resize di browser dulu (max 900px, JPEG kualitas 0.7) supaya payload ke backend kecil —
+// backend juga menolak kalau base64 > ~2.8MB sebagai pengaman tambahan.
+function resizeImageToDataUrl(file, maxSize = 900, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxSize || height > maxSize) {
+                    if (width > height) { height = Math.round(height * maxSize / width); width = maxSize; }
+                    else { width = Math.round(width * maxSize / height); height = maxSize; }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+async function onProofPhotoSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+        proofPhotoDataUrl = await resizeImageToDataUrl(file);
+        const box = document.getElementById('photoPreviewBox');
+        box.innerHTML = `<img src="${proofPhotoDataUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+        const deliveredBtn = document.getElementById('deliveredBtn');
+        deliveredBtn.disabled = false;
+        deliveredBtn.style.opacity = '1';
+    } catch (err) {
+        alert('Gagal memproses foto, coba lagi.');
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Ubah nomor HP Indonesia (0812..., +62812..., 62812...) jadi link wa.me yang valid.
+function toWaLink(noHp) {
+    if (!noHp) return null;
+    let digits = String(noHp).replace(/[^0-9]/g, '');
+    if (!digits) return null;
+    if (digits.startsWith('0')) digits = '62' + digits.slice(1);
+    else if (!digits.startsWith('62')) digits = '62' + digits;
+    return `https://wa.me/${digits}`;
+}
+
+function startSharing() {
+    if (!('geolocation' in navigator)) {
+        alert('HP/browser ini tidak mendukung GPS. Coba pakai Chrome terbaru.');
+        return;
+    }
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'block';
+    setBadge(true, 'Mengirim lokasi...');
+
+    watchId = navigator.geolocation.watchPosition(onPosition, onPositionError, {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 15000
+    });
+}
+
+function stopSharing() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+    document.getElementById('startBtn').style.display = 'block';
+    document.getElementById('stopBtn').style.display = 'none';
+    setBadge(false, 'Kirim lokasi dijeda');
+}
+
+function setBadge(live, text) {
+    const badge = document.getElementById('statusBadge');
+    if (!badge) return;
+    badge.className = 'status-badge' + (live ? '' : ' off');
+    badge.innerHTML = `<span class="dot ${live ? 'live' : ''}"></span> ${text}`;
+}
+
+async function onPosition(position) {
+    const now = Date.now();
+    if (now - lastSentAt < SEND_INTERVAL_MS) return; // throttle: jangan kirim terlalu sering
+    lastSentAt = now;
+
+    const { latitude, longitude } = position.coords;
+    try {
+        const res = await fetch(`${API_URL}/tracking/courier-ping`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, token, lat: latitude, lng: longitude })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setBadge(true, `Lokasi terkirim ${new Date().toLocaleTimeString('id-ID')}`);
+    } catch (err) {
+        setBadge(false, `Gagal kirim: ${err.message}`);
+    }
+}
+
+function onPositionError(err) {
+    let msg = 'Gagal mengambil lokasi.';
+    if (err.code === err.PERMISSION_DENIED) msg = 'Izin lokasi ditolak. Aktifkan izin GPS untuk browser ini di pengaturan HP.';
+    setBadge(false, msg);
+}
+
+async function markDelivered() {
+    if (!proofPhotoDataUrl) {
+        alert('Ambil foto bukti pengantaran dulu sebelum menandai selesai.');
+        return;
+    }
+    if (!confirm('Tandai pesanan ini SUDAH SAMPAI ke pembeli?')) return;
+    try {
+        const res = await fetch(`${API_URL}/tracking/courier-delivered`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId, token, photoBase64: proofPhotoDataUrl })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        stopSharing();
+        alert('✅ Berhasil ditandai selesai. Terima kasih!');
+        window.location.reload();
+    } catch (err) {
+        alert('Gagal: ' + err.message);
+    }
+}
+
+loadOrderInfo();
+</script>
+</body>
+</html>

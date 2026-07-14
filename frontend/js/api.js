@@ -295,6 +295,40 @@ static async updateProfile(data) {
     }
 
     // ============================================================
+    // TRACKING KURIR LIVE
+    // ============================================================
+    // Admin/karyawan: generate link kurir (token) untuk 1 pesanan yang siap diantar
+    static async generateKurirLink(id) {
+        return this.request(`/pesanan/${id}/kurir-link`, { method: 'POST' });
+    }
+
+    // Pelanggan/admin/karyawan: polling status + posisi live kurir untuk 1 pesanan
+    static async getTrackingOrder(id) {
+        return this.request(`/tracking/order/${id}`);
+    }
+
+    // ============================================================
+    // RATING & ULASAN
+    // ============================================================
+    // Pelanggan: kirim ulasan (1-5 bintang + komentar) untuk pesanan yang sudah diambil
+    static async addUlasan(pesananId, rating, komentar) {
+        return this.request(`/pesanan/${pesananId}/ulasan`, {
+            method: 'POST',
+            body: JSON.stringify({ rating, komentar })
+        });
+    }
+
+    // Cek apakah 1 pesanan sudah diberi ulasan (null kalau belum)
+    static async getUlasanPesanan(pesananId) {
+        return this.request(`/pesanan/${pesananId}/ulasan`);
+    }
+
+    // Admin/karyawan: daftar semua ulasan masuk + rata-rata rating
+    static async getAllUlasan() {
+        return this.request('/ulasan');
+    }
+
+    // ============================================================
     // STATISTIK & AKTIVITAS - DATA LANGSUNG DARI DATABASE AIVEN
     // ============================================================
     static async getStatistik() {

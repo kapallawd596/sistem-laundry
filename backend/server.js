@@ -115,7 +115,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '3mb' })); // dinaikkan dari 1mb -> 3mb supaya cukup untuk foto bukti antar (base64)
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ============ HELPER FUNCTIONS ============
@@ -461,7 +461,8 @@ app.get('/api/pesanan', authenticate, async (req, res) => {
                      status, status_pembayaran as statusPembayaran,
                      tanggal_pesan as tanggalPesan, tanggal_masuk as tanggalMasuk,
                      tanggal_selesai as tanggalSelesai, jadwal_jemput as jadwalJemput,
-                     catatan, created_at, midtrans_order_id, payment_status
+                     catatan, created_at, midtrans_order_id, payment_status,
+                     courier_status as courierStatus, courier_last_ping as courierLastPing
                      FROM pesanan`;
         let params = [];
 
@@ -1153,6 +1154,276 @@ app.get('/api/payment-status/:orderId', authenticate, async (req, res) => {
     } catch (error) {
         console.error('❌ Payment status error:', error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================================
+// ============ [FITUR BARU] TRACKING KURIR LIVE ============
+// ============================================================
+// Alur: admin/karyawan tandai pesanan 'selesai' -> generate link kurir (token acak)
+// -> link dikirim ke kurir via WA -> kurir buka /pages/kurir.html (TANPA LOGIN, pakai token)
+// -> kurir kirim GPS live tiap ~10 detik -> pelanggan & admin bisa lihat titik kurir real-time
+// -> kurir upload foto bukti antar & tandai selesai -> status pesanan otomatis jadi 'diambil'
+
+// 1) Admin/karyawan: generate link kurir untuk 1 pesanan
+app.post('/api/pesanan/:id/kurir-link', authenticate, checkRole(['admin', 'karyawan']), async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'ID tidak valid' });
+
+        const [[order]] = await pool.query('SELECT id, kode, pelanggan_nama, status FROM pesanan WHERE id = ?', [id]);
+        if (!order) return res.status(404).json({ error: 'Pesanan tidak ditemukan' });
+
+        const crypto = require('crypto');
+        const token = crypto.randomBytes(24).toString('hex');
+
+        await pool.query(
+            `UPDATE pesanan SET courier_token = ?, courier_status = 'dikirim',
+             courier_lat = NULL, courier_lng = NULL, courier_last_ping = NULL,
+             courier_photo_bukti = NULL, courier_delivered_at = NULL
+             WHERE id = ?`,
+            [token, id]
+        );
+
+        await addAktivitas(`🚚 Link kurir dibuat untuk pesanan ${order.kode} oleh ${req.user.email}`, 'info');
+
+        const origin = `${req.protocol}://${req.get('host')}`;
+        const link = `${origin}/pages/kurir.html?order=${id}&token=${token}`;
+
+        res.json({ success: true, link, kode: order.kode, pelangganNama: order.pelanggan_nama });
+    } catch (err) {
+        sendError(res, 500, 'Gagal membuat link kurir', err);
+    }
+});
+
+// 2) Kurir (PUBLIC — tanpa login, pakai token di URL): ambil info tujuan antar
+app.get('/api/tracking/courier-info/:orderId', async (req, res) => {
+    try {
+        const id = parseInt(req.params.orderId);
+        const token = req.query.token;
+        if (isNaN(id) || !token) return res.status(400).json({ error: 'Link tidak lengkap' });
+
+        const [[order]] = await pool.query(
+            `SELECT id, kode, pelanggan_nama, pelanggan_hp, pelanggan_alamat, catatan,
+                    courier_token, courier_status
+             FROM pesanan WHERE id = ?`,
+            [id]
+        );
+
+        if (!order || !order.courier_token || order.courier_token !== token) {
+            return res.status(404).json({ error: 'Link tidak valid atau sudah kedaluwarsa' });
+        }
+
+        res.json({
+            kode: order.kode,
+            namaPenerima: order.pelanggan_nama,
+            alamatLengkap: order.pelanggan_alamat || '',
+            noHp: order.pelanggan_hp || '',
+            catatanKurir: order.catatan || '',
+            status: order.courier_status === 'delivered' ? 'delivered' : 'active'
+        });
+    } catch (err) {
+        sendError(res, 500, 'Gagal memuat data pesanan', err);
+    }
+});
+
+// 3) Kurir (PUBLIC): kirim ping lokasi GPS live
+app.post('/api/tracking/courier-ping', async (req, res) => {
+    try {
+        const { orderId, token, lat, lng } = req.body;
+        const id = parseInt(orderId);
+        const latNum = parseFloat(lat);
+        const lngNum = parseFloat(lng);
+
+        if (isNaN(id) || !token || isNaN(latNum) || isNaN(lngNum)) {
+            return res.status(400).json({ error: 'Data lokasi tidak lengkap' });
+        }
+
+        const [[order]] = await pool.query(
+            'SELECT id, courier_token, courier_status FROM pesanan WHERE id = ?', [id]
+        );
+        if (!order || order.courier_token !== token) {
+            return res.status(404).json({ error: 'Link tidak valid' });
+        }
+        if (order.courier_status === 'delivered') {
+            return res.status(400).json({ error: 'Pesanan ini sudah selesai diantar' });
+        }
+
+        await pool.query(
+            `UPDATE pesanan SET courier_lat = ?, courier_lng = ?, courier_last_ping = NOW(),
+             courier_status = 'on_the_way' WHERE id = ?`,
+            [latNum, lngNum, id]
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        sendError(res, 500, 'Gagal mengirim lokasi', err);
+    }
+});
+
+// 4) Kurir (PUBLIC): tandai selesai diantar + upload foto bukti
+app.post('/api/tracking/courier-delivered', async (req, res) => {
+    try {
+        const { orderId, token, photoBase64 } = req.body;
+        const id = parseInt(orderId);
+        if (isNaN(id) || !token) return res.status(400).json({ error: 'Data tidak lengkap' });
+        if (!photoBase64 || typeof photoBase64 !== 'string' || !photoBase64.startsWith('data:image/')) {
+            return res.status(400).json({ error: 'Foto bukti pengantaran wajib disertakan' });
+        }
+        if (photoBase64.length > 2_800_000) { // ~2MB base64, sejalan dgn resize di frontend
+            return res.status(400).json({ error: 'Ukuran foto terlalu besar, coba ambil ulang' });
+        }
+
+        const [[order]] = await pool.query(
+            'SELECT id, kode, courier_token, courier_status FROM pesanan WHERE id = ?', [id]
+        );
+        if (!order || order.courier_token !== token) {
+            return res.status(404).json({ error: 'Link tidak valid' });
+        }
+        if (order.courier_status === 'delivered') {
+            return res.status(400).json({ error: 'Pesanan ini sudah ditandai selesai sebelumnya' });
+        }
+
+        await pool.query(
+            `UPDATE pesanan SET courier_status = 'delivered', courier_photo_bukti = ?,
+             courier_delivered_at = NOW(), status = 'diambil' WHERE id = ?`,
+            [photoBase64, id]
+        );
+
+        await addAktivitas(`✅ Pesanan ${order.kode} sudah diantar kurir & diterima pelanggan`, 'success');
+
+        res.json({ success: true });
+    } catch (err) {
+        sendError(res, 500, 'Gagal menandai pesanan selesai', err);
+    }
+});
+
+// 5) Pelanggan / admin / karyawan (LOGIN): polling status + posisi live kurir
+//    Dipanggil tiap beberapa detik oleh halaman tracking pelanggan & peta admin.
+app.get('/api/tracking/order/:id', authenticate, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'ID tidak valid' });
+
+        const [[order]] = await pool.query(
+            `SELECT id, pelanggan_id, kode, status,
+                    courier_status as courierStatus,
+                    courier_lat as courierLat, courier_lng as courierLng,
+                    courier_last_ping as courierLastPing,
+                    courier_delivered_at as courierDeliveredAt,
+                    courier_photo_bukti as courierPhotoBukti
+             FROM pesanan WHERE id = ?`,
+            [id]
+        );
+
+        if (!order) return res.status(404).json({ error: 'Pesanan tidak ditemukan' });
+
+        if (req.user.role === 'pelanggan' && order.pelanggan_id !== req.user.id) {
+            return res.status(403).json({ error: 'Akses ditolak' });
+        }
+
+        res.json(order);
+    } catch (err) {
+        sendError(res, 500, 'Gagal memuat status tracking', err);
+    }
+});
+
+// ============================================================
+// ============ [FITUR BARU] RATING & ULASAN PELANGGAN ============
+// ============================================================
+// Alur: pesanan pelanggan berstatus 'diambil' -> pelanggan boleh kasih rating (1-5) + komentar
+// -> 1 pesanan cuma boleh 1 ulasan -> admin/karyawan bisa lihat semua ulasan masuk.
+
+// 1) Pelanggan: kirim ulasan untuk 1 pesanan miliknya yang sudah selesai/diambil
+app.post('/api/pesanan/:id/ulasan', authenticate, checkRole(['pelanggan']), async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'ID pesanan tidak valid' });
+
+        const { rating, komentar } = req.body;
+        const ratingNum = parseInt(rating);
+        if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+            return res.status(400).json({ error: 'Rating wajib diisi (1-5 bintang)' });
+        }
+        if (komentar && String(komentar).length > 1000) {
+            return res.status(400).json({ error: 'Komentar maksimal 1000 karakter' });
+        }
+
+        const [[order]] = await pool.query(
+            'SELECT id, kode, pelanggan_id, status FROM pesanan WHERE id = ?', [id]
+        );
+        if (!order) return res.status(404).json({ error: 'Pesanan tidak ditemukan' });
+        if (order.pelanggan_id !== req.user.id) {
+            return res.status(403).json({ error: 'Akses ditolak' });
+        }
+        if (order.status !== 'diambil') {
+            return res.status(400).json({ error: 'Ulasan hanya bisa diberikan setelah pesanan selesai diambil' });
+        }
+
+        const [[existing]] = await pool.query('SELECT id FROM ulasan WHERE pesanan_id = ?', [id]);
+        if (existing) {
+            return res.status(400).json({ error: 'Kamu sudah memberi ulasan untuk pesanan ini' });
+        }
+
+        await pool.query(
+            'INSERT INTO ulasan (pesanan_id, pelanggan_id, rating, komentar) VALUES (?, ?, ?, ?)',
+            [id, req.user.id, ratingNum, (komentar || '').trim()]
+        );
+
+        await addAktivitas(`⭐ ${req.user.nama} memberi ulasan ${ratingNum} bintang untuk pesanan ${order.kode}`, 'success');
+
+        res.json({ success: true, message: 'Terima kasih atas ulasan Anda!' });
+    } catch (err) {
+        sendError(res, 500, 'Gagal mengirim ulasan', err);
+    }
+});
+
+// 2) Pelanggan: cek apakah 1 pesanan miliknya sudah diberi ulasan (untuk sembunyikan tombol "Beri Ulasan")
+app.get('/api/pesanan/:id/ulasan', authenticate, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'ID pesanan tidak valid' });
+
+        const [[order]] = await pool.query('SELECT id, pelanggan_id FROM pesanan WHERE id = ?', [id]);
+        if (!order) return res.status(404).json({ error: 'Pesanan tidak ditemukan' });
+        if (req.user.role === 'pelanggan' && order.pelanggan_id !== req.user.id) {
+            return res.status(403).json({ error: 'Akses ditolak' });
+        }
+
+        const [[ulasan]] = await pool.query(
+            'SELECT id, rating, komentar, created_at as createdAt FROM ulasan WHERE pesanan_id = ?', [id]
+        );
+        res.json(ulasan || null);
+    } catch (err) {
+        sendError(res, 500, 'Gagal memuat ulasan', err);
+    }
+});
+
+// 3) Admin/karyawan: daftar semua ulasan masuk + rata-rata rating
+app.get('/api/ulasan', authenticate, checkRole(['admin', 'karyawan']), async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT u.id, u.rating, u.komentar, u.created_at as createdAt,
+                   p.kode as pesananKode, p.layanan_nama as layananNama,
+                   pl.nama as pelangganNama
+            FROM ulasan u
+            JOIN pesanan p ON p.id = u.pesanan_id
+            JOIN users pl ON pl.id = u.pelanggan_id
+            ORDER BY u.created_at DESC
+        `);
+
+        const [[agg]] = await pool.query(`
+            SELECT COUNT(*) as totalUlasan, COALESCE(AVG(rating), 0) as rataRata
+            FROM ulasan
+        `);
+
+        res.json({
+            ulasan: rows,
+            totalUlasan: agg.totalUlasan,
+            rataRata: Math.round(agg.rataRata * 10) / 10
+        });
+    } catch (err) {
+        sendError(res, 500, 'Gagal memuat daftar ulasan', err);
     }
 });
 

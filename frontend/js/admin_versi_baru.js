@@ -178,7 +178,8 @@ async function loadPage(page) {
         laporan: 'Laporan & Statistik', 
         users: 'Manajemen User',
         settings: 'Pengaturan',
-        map: 'Peta & Tracking Lokasi'
+        map: 'Peta & Tracking Lokasi',
+        ulasan: 'Rating & Ulasan Pelanggan'
     };
     
     const icons = {
@@ -189,7 +190,8 @@ async function loadPage(page) {
         laporan: 'fa-chart-pie',
         users: 'fa-user-cog',
         settings: 'fa-cog',
-        map: 'fa-map-marker-alt'
+        map: 'fa-map-marker-alt',
+        ulasan: 'fa-star'
     };
     
     document.getElementById('pageTitle').innerHTML = `<i class="fas ${icons[page]}"></i> ${titles[page]}`;
@@ -203,6 +205,7 @@ async function loadPage(page) {
     else if (page === 'users') await loadUsers();
     else if (page === 'settings') await loadSettings();
     else if (page === 'map') await loadMapPage();
+    else if (page === 'ulasan') await loadUlasan();
 }
 
 // ============ DASHBOARD - DATA DARI AIVEN ============
@@ -693,6 +696,49 @@ window.showTambahPelanggan = function() {
         } catch(e) { showToast('error', e.message); }
     };
 };
+
+// ============ RATING & ULASAN PELANGGAN ============
+async function loadUlasan() {
+    try {
+        const data = await LaundryAPI.getAllUlasan();
+        currentPageData.ulasan = data.ulasan;
+
+        const starsHtml = (rating) => `<span style="color:#f59e0b;letter-spacing:2px;">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</span>`;
+
+        const html = `
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value">${data.totalUlasan}</div><div class="stat-label">Total Ulasan</div></div>
+                <div class="stat-card"><div class="stat-value">${data.rataRata} <i class="fas fa-star" style="font-size:0.9rem;color:#f59e0b;"></i></div><div class="stat-label">Rata-rata Rating</div></div>
+            </div>
+            <div class="glass-card">
+                <div class="card-header"><span><i class="fas fa-star"></i> Ulasan Masuk dari Pelanggan</span></div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead><tr><th>Pelanggan</th><th>Pesanan</th><th>Layanan</th><th>Rating</th><th>Komentar</th><th>Tanggal</th></tr></thead>
+                            <tbody id="ulasanTableBody">
+                                ${data.ulasan.map(u => `
+                                    <tr>
+                                        <td><strong>${escapeHtml(u.pelangganNama)}</strong></td>
+                                        <td>${escapeHtml(u.pesananKode)}</td>
+                                        <td>${escapeHtml(u.layananNama || '-')}</td>
+                                        <td>${starsHtml(u.rating)}</td>
+                                        <td style="max-width:280px;">${u.komentar ? escapeHtml(u.komentar) : '<span style="color:#64748b;">-</span>'}</td>
+                                        <td style="font-size:0.7rem;white-space:nowrap;">${formatDate(u.createdAt)}</td>
+                                    </tr>
+                                `).join('')}
+                                ${data.ulasan.length === 0 ? '<tr><td colspan="6" class="text-center" style="padding:16px;color:#64748b;">Belum ada ulasan masuk dari pelanggan.</td></tr>' : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('pageContent').innerHTML = html;
+    } catch (e) {
+        document.getElementById('pageContent').innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
+    }
+}
 
 window.editPelanggan = async function(id) {
     const pelanggan = await LaundryAPI.getPelanggan();
@@ -1723,6 +1769,7 @@ async function loadTrackingOrders() {
                         <button class="btn btn-sm btn-outline" onclick="showOrderDetail('${o.kode}')">
                             <i class="fas fa-info-circle"></i> Detail
                         </button>
+                        ${renderKurirButtonAdmin(o)}
                     </div>
                 </div>
             `;
@@ -1773,6 +1820,83 @@ async function loadTrackingOrders() {
 window.refreshTracking = function() {
     showToast('info', '🔄 Memperbarui data...');
     loadTrackingOrders();
+};
+
+// ============================================================
+// KIRIM KE KURIR + LIVE GPS (dipakai di kartu "Tracking Pesanan Aktif")
+// ============================================================
+function renderKurirButtonAdmin(o) {
+    if (o.status !== 'selesai') return ''; // baru relevan kalau cucian sudah siap diantar
+    if (o.courierStatus === 'on_the_way') {
+        return `<button class="btn btn-sm btn-success" onclick="showKurirLiveOnMap(${o.id})"><i class="fas fa-truck-fast"></i> Kurir Live</button>`;
+    }
+    if (o.courierStatus === 'dikirim') {
+        return `<button class="btn btn-sm btn-outline" onclick="kirimKeKurirAdmin(${o.id}, '${(o.pelangganNama || '').replace(/'/g, "\\'")}')"><i class="fas fa-truck"></i> Kirim Ulang Link</button>`;
+    }
+    return `<button class="btn btn-sm btn-primary" onclick="kirimKeKurirAdmin(${o.id}, '${(o.pelangganNama || '').replace(/'/g, "\\'")}')"><i class="fas fa-truck"></i> Kirim ke Kurir</button>`;
+}
+
+window.kirimKeKurirAdmin = async function(orderId, pelangganNama) {
+    try {
+        showToast('info', 'Membuat link kurir...');
+        const result = await LaundryAPI.generateKurirLink(orderId);
+        if (!result.success) { showToast('error', result.error || 'Gagal membuat link kurir'); return; }
+
+        const pesan = `Halo Kurir, tolong antar pesanan *${result.kode}* a.n *${pelangganNama}*.\nBuka link ini untuk lihat alamat, rute, dan kirim lokasi live selama mengantar:\n${result.link}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, '_blank');
+
+        showToast('success', 'Link kurir dibuat. Kirim ke kurir lewat WhatsApp.');
+        await loadTrackingOrders();
+    } catch (e) {
+        showToast('error', e.message);
+    }
+};
+
+// Ambil posisi live kurir & taruh marker truk di peta Leaflet yang sudah ada
+window.showKurirLiveOnMap = async function(orderId) {
+    try {
+        const data = await LaundryAPI.getTrackingOrder(orderId);
+        if (!data.courierLat || !data.courierLng) {
+            showToast('info', 'Kurir belum mulai mengirim lokasi live.');
+            return;
+        }
+        if (!map || typeof L === 'undefined') {
+            showToast('error', 'Peta belum siap. Buka halaman ini dulu dan tunggu peta termuat.');
+            return;
+        }
+
+        const lat = parseFloat(data.courierLat);
+        const lng = parseFloat(data.courierLng);
+
+        map.invalidateSize();
+        map.setView([lat, lng], 16);
+
+        if (window._kurirMarker) map.removeLayer(window._kurirMarker);
+
+        const lastPing = data.courierLastPing ? new Date(data.courierLastPing).toLocaleTimeString('id-ID') : '-';
+
+        window._kurirMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="background:#10B981;padding:6px 14px;border-radius:20px;color:white;font-weight:bold;font-size:0.75rem;white-space:nowrap;box-shadow:0 4px 16px rgba(16,185,129,0.5);">
+                    <i class="fas fa-motorcycle"></i> Kurir
+                </div>`,
+                iconSize: [90, 32],
+                popupAnchor: [0, -10]
+            })
+        }).addTo(map).bindPopup(`
+            <b>🚚 Posisi Kurir Live</b><br>
+            Update terakhir: ${lastPing}<br><br>
+            <button class="btn btn-sm btn-primary" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${lat},${lng}', '_blank')">
+                <i class="fas fa-external-link-alt"></i> Buka di Google Maps
+            </button>
+        `).openPopup();
+
+        document.getElementById('map')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showToast('success', '🚚 Posisi kurir ditemukan!');
+    } catch (e) {
+        showToast('error', e.message);
+    }
 };
 
 // ============================================================
