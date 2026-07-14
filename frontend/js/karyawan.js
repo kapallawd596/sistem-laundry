@@ -290,10 +290,56 @@ function renderPesananRow(p) {
                     <option value="diambil" ${p.status === 'diambil' ? 'selected' : ''}>📦 Diambil</option>
                 </select>
                 ${p.statusPembayaran === 'menunggu_verifikasi' ? `<button class="btn btn-sm btn-success" onclick="konfirmasiLunasKaryawan(${p.id})"><i class="fas fa-check-circle"></i> Konfirmasi Lunas</button>` : ''}
+                ${renderKurirButton(p)}
             </td>
         </tr>
     `;
 }
+
+// ============================================================
+// KIRIM KE KURIR (Live GPS Tracking)
+// ============================================================
+function renderKurirButton(p) {
+    if (p.status !== 'selesai') return ''; // kurir cuma relevan kalau cucian sudah siap diantar
+    if (p.courierStatus === 'on_the_way') {
+        return `<button class="btn btn-sm btn-success" onclick="lihatLokasiKurir(${p.id})"><i class="fas fa-location-dot"></i> Kurir Sedang Jalan</button>`;
+    }
+    if (p.courierStatus === 'dikirim') {
+        return `<button class="btn btn-sm btn-outline" onclick="kirimKeKurir(${p.id}, '${(p.pelangganNama || '').replace(/'/g, "\\'")}', '${p.pelangganHp || ''}')"><i class="fas fa-truck"></i> Kirim Ulang Link Kurir</button>`;
+    }
+    return `<button class="btn btn-sm btn-primary" onclick="kirimKeKurir(${p.id}, '${(p.pelangganNama || '').replace(/'/g, "\\'")}', '${p.pelangganHp || ''}')"><i class="fas fa-truck"></i> Kirim ke Kurir</button>`;
+}
+
+window.kirimKeKurir = async function(orderId, pelangganNama, kurirHp) {
+    try {
+        showToast('info', 'Membuat link kurir...');
+        const result = await LaundryAPI.generateKurirLink(orderId);
+        if (!result.success) { showToast('error', result.error || 'Gagal membuat link kurir'); return; }
+
+        const pesan = `Halo Kurir, tolong antar pesanan *${result.kode}* a.n *${pelangganNama}*.\nBuka link ini untuk lihat alamat, rute, dan kirim lokasi live selama mengantar:\n${result.link}`;
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+        window.open(waUrl, '_blank');
+
+        showToast('success', 'Link kurir dibuat. Kirim ke kurir lewat WhatsApp.');
+        await loadPage('pesanan');
+    } catch (e) {
+        showToast('error', e.message);
+    }
+};
+
+window.lihatLokasiKurir = async function(orderId) {
+    try {
+        const data = await LaundryAPI.getTrackingOrder(orderId);
+        if (!data.courierLat || !data.courierLng) {
+            showToast('info', 'Kurir belum mulai mengirim lokasi.');
+            return;
+        }
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${data.courierLat},${data.courierLng}`;
+        window.open(mapsUrl, '_blank');
+    } catch (e) {
+        showToast('error', e.message);
+    }
+};
 
 window.konfirmasiLunasKaryawan = async function(orderId) {
     if (!confirm('Pastikan sudah cek bukti transfer (WA/mutasi) dan uang benar-benar masuk. Konfirmasi sebagai Lunas?')) return;
